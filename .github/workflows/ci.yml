@@ -8,12 +8,12 @@ on:
 
 jobs:
   build-test:
-    name: gfortran ${{ matrix.variant }}
+    name: ${{ matrix.preset }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        variant: [serial, openmp, mpi]
+        preset: [gfortran-serial, gfortran-openmp, gfortran-mpi]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,61 +23,66 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran liblapack-dev libblas-dev
-          if [ "${{ matrix.variant }}" = "mpi" ]; then
+          if [ "${{ matrix.preset }}" = "gfortran-mpi" ]; then
             sudo apt-get install -y libopenmpi-dev openmpi-bin
           fi
 
       - name: Install Python test deps
         run: pip install numpy h5py
 
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
       - name: Build
-        run: |
-          cp System/Makefile.compiler.gfortran Makefile.compiler
-          if [ "${{ matrix.variant }}" = "mpi" ]; then
-            make all MPIMOD=mpi FC=mpif90
-          else
-            make all
-          fi
+        run: cmake --build --preset ${{ matrix.preset }} -j
 
-      - name: Stage smoke case
-        run: make ready_run
+      - name: Test (smoke + statistical regression + harness self-test)
+        env:
+          # allow 2 MPI ranks on the 2-core public runners
+          OMPI_MCA_rmaps_base_oversubscribe: "1"
+        run: ctest --preset ${{ matrix.preset }}
 
-      - name: Configure variant
+      - name: Threaded regression (nomp=2)
+        if: matrix.preset == 'gfortran-openmp'
         run: |
-          cd Run
-          rm -f input.par
-          cp ../Input/input.par.lte input.par
-          if [ "${{ matrix.variant }}" = "openmp" ]; then
-            sed -i 's/ in_nomp = 1/ in_nomp = 2/' input.par
-          fi
-
-      - name: Run smoke case
-        run: |
-          cd Run
-          if [ "${{ matrix.variant }}" = "mpi" ]; then
-            mpirun -n 2 --oversubscribe ./superlite | tee stdout.log
-          else
-            ./superlite | tee stdout.log
-          fi
+          BUILD=build/${{ matrix.preset }}
+          rm -rf $BUILD/smoke_run_omp2 && mkdir -p $BUILD/smoke_run_omp2
+          cd $BUILD/smoke_run_omp2
+          ln -s $GITHUB_WORKSPACE/Data/* .
+          ln -s $GITHUB_WORKSPACE/Input/* .
+          ln -sf input_w7.str input.str
+          sed 's/ in_nomp = 1/ in_nomp = 2/' $GITHUB_WORKSPACE/Input/input.par.lte > input.par
+          ../superlite | tee stdout.log
           grep -q "SuperLite finished" stdout.log
-
-      - name: Regression vs reference ensemble
-        if: matrix.variant == 'serial'
-        run: |
-          test -f tests/regression/reference/smoke.h5 || \
-            { echo "::warning::no committed reference ensemble yet; skipping"; exit 0; }
-          python tests/regression/compare.py Run -v
-
-      - name: Regression self-test (perturbed run must fail)
-        if: matrix.variant == 'serial'
-        run: |
-          test -f tests/regression/reference/smoke.h5 || exit 0
-          python tests/regression/compare.py Run --perturb 0.05
+          cd $GITHUB_WORKSPACE
+          python tests/regression/compare.py $BUILD/smoke_run_omp2 -v
 
       - name: Upload run outputs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: run-outputs-${{ matrix.variant }}
-          path: Run/output.*
+          name: run-outputs-${{ matrix.preset }}
+          path: build/${{ matrix.preset }}/smoke_run*/output.*
           if-no-files-found: ignore
+
+  ifx:
+    name: ifx-release (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Intel oneAPI Fortran
+        run: |
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | sudo gpg --dearmor -o /usr/share/keyrings/oneapi-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+          sudo apt-get install -y intel-oneapi-compiler-fortran liblapack-dev libblas-dev
+
+      - name: Configure and build
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          cmake --preset ifx-release
+          cmake --build --preset ifx-release -j

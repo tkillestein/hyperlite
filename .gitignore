@@ -45,3 +45,4 @@ Testsuite/*_Run/
 
 # ensemble/test scratch
 tests/regression/__pycache__/
+build/

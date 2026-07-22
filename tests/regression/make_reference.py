@@ -73,7 +73,8 @@ def git_describe() -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--exe', type=Path, default=REPO / 'superlite')
+    ap.add_argument('--exe', type=Path,
+                    default=REPO / 'build' / 'gfortran-serial' / 'superlite')
     ap.add_argument('--input-par', type=Path,
                     default=REPO / 'Input' / 'input.par.lte')
     ap.add_argument('--n', type=int, default=20, help='ensemble size')

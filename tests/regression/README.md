@@ -29,8 +29,9 @@ an RNG swap) and after demonstrating two-sample consistency with the previous
 ensemble:
 
 ```bash
-make all
-python tests/regression/make_reference.py --exe ./superlite --n 20 --jobs 8
+cmake --preset gfortran-serial && cmake --build --preset gfortran-serial -j
+python tests/regression/make_reference.py \
+    --exe build/gfortran-serial/superlite --n 20 --jobs 8
 ```
 
 The reference records `(code version, date, n_ensemble, nmpi, nomp, case)` in
@@ -40,9 +41,12 @@ The reference records `(code version, date, n_ensemble, nmpi, nomp, case)` in
 ## Checking a run
 
 ```bash
-make ready_run && (cd Run && ./superlite)
-python tests/regression/compare.py Run -v          # exit 0 = pass
-python tests/regression/compare.py Run --perturb 0.05  # self-test: must fail
+ctest --preset gfortran-openmp   # smoke-run + regression-smoke + regression-selftest
 ```
 
-`make check` runs the same via `Testsuite/first/test.sh`.
+or manually against any run directory:
+
+```bash
+python tests/regression/compare.py RUNDIR -v          # exit 0 = pass
+python tests/regression/compare.py RUNDIR --perturb 0.05  # self-test: must fail
+```

@@ -3,6 +3,20 @@ SuperLite - IMC-DDMC Radiation Transport Code for Interacting Transients
 
 The code setup instructions and documentation is available at
 https://gururajw.github.io/superlite_docs/
+(note: this fork has replaced the legacy Make build described there with
+CMake presets — see below).
+
+Quickstart (this fork)
+----------------------
+Requires CMake >= 3.23, gfortran >= 10, LAPACK/BLAS; optional OpenMPI,
+Python 3 + numpy/h5py for the regression tests.
+
+    cmake --preset gfortran-openmp          # or gfortran-serial / -mpi / -debug
+    cmake --build --preset gfortran-openmp -j
+    ctest --preset gfortran-openmp          # smoke run + statistical regression
+
+See OVERHAUL.md for the modernization plan and tests/regression/ for the
+regression-harness details.
 
 Copyright (c) 2023 Gururaj Wagle.  All rights reserved.
 
