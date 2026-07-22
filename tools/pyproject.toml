@@ -1,0 +1,56 @@
+#This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperlite-tools"
+version = "1.99.0"
+description = "Python tools for the hyperlite (SuperLite) IMC-DDMC radiation-transport code: input-deck converters, flux post-processing, wavelength-grid generation"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+requires-python = ">=3.9"
+dependencies = [
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "h5py",
+]
+
+[project.urls]
+Homepage = "https://github.com/tkillestein/hyperlite"
+
+[project.scripts]
+sgfilter = "hyperlite_tools.sgfilter:main"
+wlgenadd = "hyperlite_tools.wlgenadd:main"
+stella2superlite = "hyperlite_tools._run:stella2superlite"
+parse-hdf5-sndata = "hyperlite_tools._run:parse_hdf5_sndata"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.14",
+  "ty",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hyperlite_tools*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W", "UP", "B"]
+ignore = [
+  "E741",   # ambiguous variable names: legacy scientific code uses l, I freely
+  "UP031",  # %-formatting is used consistently in the legacy scripts
+]
+
+[tool.ruff.lint.per-file-ignores]
+# legacy top-to-bottom scripts, ported as-is; cleaned up in a later phase
+"hyperlite_tools/stella2superlite.py" = ["E701", "E702", "B007", "F841"]
+"hyperlite_tools/parse_hdf5_sndata.py" = ["E701", "E702", "B007", "F841"]
+
+[tool.ty.environment]
+python-version = "3.9"

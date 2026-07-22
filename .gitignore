@@ -41,8 +41,14 @@ version.inc
 gitdiff.txt
 superlite
 Run/
-Testsuite/*_Run/
+tests/cases/*_Run/
 
 # ensemble/test scratch
 tests/regression/__pycache__/
 build/
+
+# python packaging
+tools/hyperlite_tools/__pycache__/
+tools/*.egg-info/
+tools/hyperlite_tools.egg-info/
+tools/.venv/

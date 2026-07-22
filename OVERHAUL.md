@@ -287,7 +287,12 @@ The safety net must exist before anything else moves.
 1. Move sources into `src/**` per the target layout; update CMake source lists.
 2. `pyproject.toml` packaging the tools as `hyperlite-tools`; **port
    `sgfilter.py` and `wlgenadd.py` from Python 2 → 3**; declare deps
-   (numpy/scipy/matplotlib/h5py).
+   (numpy/scipy/matplotlib/h5py). Package managed with `uv` (committed
+   lockfile), linted with `ruff`, type-checked with `ty`.
+   *Follow-up (post-Phase-2):* when the legacy top-to-bottom scripts
+   (`stella2superlite.py`, `parse_hdf5_sndata.py`) are refactored into proper
+   entry points, build the command lines with **`rich-click`** for grouped,
+   styled `--help` output across all console scripts.
 3. Move test decks under `tests/cases/`; fix/annotate the mismatched A4 decks.
 - **Gate 2:** build green from the new layout; `pip install -e tools/` works and
   its console scripts run; regression still green (byte-for-byte identical binary

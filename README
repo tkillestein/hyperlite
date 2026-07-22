@@ -15,6 +15,14 @@ Python 3 + numpy/h5py for the regression tests.
     cmake --build --preset gfortran-openmp -j
     ctest --preset gfortran-openmp          # smoke run + statistical regression
 
+Layout: Fortran sources live under src/ (core/io/grid/gas/group/source/
+transport/output), atomic data under data/, test decks under tests/cases/.
+
+The Python tools (stella2superlite, sgfilter, wlgenadd, parse-hdf5-sndata)
+are packaged as hyperlite-tools:
+
+    pip install -e tools/
+
 See OVERHAUL.md for the modernization plan and tests/regression/ for the
 regression-harness details.
 

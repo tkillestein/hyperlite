@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Oct 29 11:52:10 2021
 
@@ -12,16 +11,18 @@ Example:
 >> python stella_to_supernu_lite_IIn.py -o=path/to/sim-superlite/folder -p=path/to/stella/res/folder -d=20 -t -s --show-plots
 """
 
-import os,re,sys,shutil
+import os
+import re
+import sys
+import shutil
 import argparse
 import numpy as np
-from myfuncts import hasNum,find_nearest_ind,safe_log_array,replace_line
-from myfuncts import load_stella_prof
+from hyperlite_tools.myfuncts import hasNum,find_nearest_ind,safe_log_array,replace_line
+from hyperlite_tools.myfuncts import load_stella_prof
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-home = os.path.expanduser('~')
 M_sun = 1.98841e33 #grams
 
 '''
@@ -66,6 +67,13 @@ parser.add_argument('--show-plots',action='store_true',
                     help='display the profile plots before saving')
 parser.add_argument('--out-prefix',type=str,default='Model',
                     help='Common prefix for output profile plots')
+parser.add_argument('--template-dir',type=str,
+                    default=os.path.join(os.path.dirname(os.path.dirname(
+                        os.path.dirname(os.path.abspath(__file__)))),
+                        'tests','cases','w7'),
+                    help='Directory containing the input.par.lte/.nlte'
+                    ' template decks (default: the w7 decks of a repository'
+                    ' checkout)')
 
 ### Esssential inputs
 args = parser.parse_args()
@@ -108,7 +116,7 @@ mpl.rc('ytick.major',size=12)
 mpl.rc('ytick.minor',visible=True, size=8)
 mpl.rc('font',size=14)
 mpl.rc('axes',labelsize=14,linewidth=0.8)
-mpl.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.cividis.colors)
+mpl.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.cividis.colors)  # ty: ignore[unresolved-attribute]  # ListedColormap has .colors
 mpl.rc('legend',frameon=False)
 mpl.rc('lines',lw=2)
 
@@ -181,8 +189,8 @@ fig1.clear()
 plt.suptitle('day = %s' % day)
 ax11 = fig1.add_subplot(2,2,1)
 ax11.set_title('Velocity')
-ax11.set_xlabel('$ \\rm R_{outer} \ (\\times 10^{14} \ cm)$')
-ax11.set_ylabel('$ \\rm v_{outer} \ (\\times 10^3 \ km \ s^{-1})$')
+ax11.set_xlabel('$ \\rm R_{outer} \\ (\\times 10^{14} \\ cm)$')
+ax11.set_ylabel('$ \\rm v_{outer} \\ (\\times 10^3 \\ km \\ s^{-1})$')
 ax11.plot(data_stella['r_outer_cm']/1e14,vel_right/1e8,
           color=colors[0],label="Stella")
 ax11.axvline(data_stella['r_center_cm'][ind_tau1]/1e14,
@@ -193,7 +201,7 @@ ax11.text(data_stella['r_center_cm'][ind_tau1]/1e14,
 ax11.legend()
 ax12 = fig1.add_subplot(2,2,2)
 ax12.set_title('Cumulative Mass')
-ax12.set_xlabel('$ \\rm R_{outer} \ (\\times 10^{14} \ cm)$')
+ax12.set_xlabel('$ \\rm R_{outer} \\ (\\times 10^{14} \\ cm)$')
 ax12.set_ylabel('Mass ($\\rm M_{\\odot}$)')
 ax12.plot(data_stella['r_outer_cm'][1:]/1e14,
           np.cumsum(data_stella['m_cell_g'][1:]/M_sun),
@@ -206,8 +214,8 @@ ax12.text(data_stella['r_center_cm'][ind_tau1]/1e14,
 ax12.legend()
 ax13 = fig1.add_subplot(2,2,3)
 ax13.set_title('Temperature')
-ax13.set_xlabel('$ \\rm R_{outer} \ (\\times 10^{14} \ cm)$')
-ax13.set_ylabel('$\\rm T \ (\\times 10^4 \ K)$')
+ax13.set_xlabel('$ \\rm R_{outer} \\ (\\times 10^{14} \\ cm)$')
+ax13.set_ylabel('$\\rm T \\ (\\times 10^4 \\ K)$')
 ax13.plot(data_stella['r_outer_cm']/1e14,data_stella['Tavg']/1e4,
           color=colors[0],label="Stella,T$_{avg}$")
 ax13.plot(data_stella['r_outer_cm']/1e14,data_stella['Trad']/1e4,
@@ -220,7 +228,7 @@ ax13.text(data_stella['r_center_cm'][ind_tau1]/1e14,
 ax13.legend()
 ax14 = fig1.add_subplot(2,2,4)
 ax14.set_title('Optical Depth')
-ax14.set_xlabel('$ \\rm R_{outer} \ (\\times 10^{14} \ cm)$')
+ax14.set_xlabel('$ \\rm R_{outer} \\ (\\times 10^{14} \\ cm)$')
 ax14.set_ylabel('$\\rm log_{10}\\tau$')
 ax14.plot(data_stella['r_outer_cm']/1e14,safe_log_array(data_stella['tau']),
           color=colors[0],label="Stella")
@@ -693,9 +701,13 @@ for i in range(0,n_zones):
 outfile.close()
 
 ### update parameters in input.par
-shutil.copy2(home+'/codes/superlite/src/Input/input.par.lte',
+if not os.path.exists(args.template_dir+'/input.par.lte'):
+    sys.exit("input.par templates not found in %s; use --template-dir to"
+             " point at a directory with input.par.lte/.nlte decks"
+             % args.template_dir)
+shutil.copy2(args.template_dir+'/input.par.lte',
              outdir+'/input.par.lte')
-shutil.copy2(home+'/codes/superlite/src/Input/input.par.nlte',
+shutil.copy2(args.template_dir+'/input.par.nlte',
              outdir+'/input.par.nlte')
 
 file = outdir+'/input.par.lte'

@@ -36,7 +36,7 @@ python tests/regression/make_reference.py \
 
 The reference records `(code version, date, n_ensemble, nmpi, nomp, case)` in
 `/meta`. The committed reference was generated with `nmpi=1, nomp=1` from the
-`Input/input.par.lte` W7 smoke case.
+`tests/cases/w7/input.par.lte` W7 smoke case.
 
 ## Checking a run
 

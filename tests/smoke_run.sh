@@ -13,10 +13,10 @@ shift 3
 rm -rf "$RUNDIR"
 mkdir -p "$RUNDIR"
 cd "$RUNDIR"
-ln -s "$SRC"/Data/* .
-ln -s "$SRC"/Input/* .
+ln -s "$SRC"/data/* .
+ln -s "$SRC"/tests/cases/w7/* .
 ln -sf input_w7.str input.str
-cp "$SRC"/Input/input.par.lte input.par
+cp "$SRC"/tests/cases/w7/input.par.lte input.par
 
 "$@" "$EXE" | tee stdout.log
 grep -q "SuperLite finished" stdout.log

@@ -3,8 +3,8 @@ containing an input.par and input.str file. The models are described in
 detail in the SuperLite methods paper (Wagle et al. 2023, ApJ 953 132).
 
 The w7 smoke-test model (a typical SN Ia carbon-oxygen WD model from
-Nomoto et al. 1984 at 10d from shock breakout) ships in the top-level
-Input/ directory and is exercised by CTest (`ctest --preset gfortran-openmp`),
+Nomoto et al. 1984 at 10d from shock breakout) ships in the w7/
+subdirectory here and is exercised by CTest (`ctest --preset gfortran-openmp`),
 which validates a run against the committed statistical reference ensemble
 in tests/regression/reference/ (see tests/regression/ for the harness and
 for how to regenerate references).

@@ -48,10 +48,10 @@ jobs:
           BUILD=build/${{ matrix.preset }}
           rm -rf $BUILD/smoke_run_omp2 && mkdir -p $BUILD/smoke_run_omp2
           cd $BUILD/smoke_run_omp2
-          ln -s $GITHUB_WORKSPACE/Data/* .
-          ln -s $GITHUB_WORKSPACE/Input/* .
+          ln -s $GITHUB_WORKSPACE/data/* .
+          ln -s $GITHUB_WORKSPACE/tests/cases/w7/* .
           ln -sf input_w7.str input.str
-          sed 's/ in_nomp = 1/ in_nomp = 2/' $GITHUB_WORKSPACE/Input/input.par.lte > input.par
+          sed 's/ in_nomp = 1/ in_nomp = 2/' $GITHUB_WORKSPACE/tests/cases/w7/input.par.lte > input.par
           ../superlite | tee stdout.log
           grep -q "SuperLite finished" stdout.log
           cd $GITHUB_WORKSPACE
@@ -64,6 +64,41 @@ jobs:
           name: run-outputs-${{ matrix.preset }}
           path: build/${{ matrix.preset }}/smoke_run*/output.*
           if-no-files-found: ignore
+
+  tools:
+    name: hyperlite-tools (uv + ruff + ty + console scripts)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install package (locked)
+        run: uv sync --locked
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Type-check (ty)
+        run: uv run ty check
+
+      - name: Console scripts respond
+        run: |
+          uv run sgfilter --help
+          uv run wlgenadd --help
+          uv run stella2superlite --help
+          uv run parse-hdf5-sndata --help
+          uv run python -c "import hyperlite_tools.myfuncts"
+
+      - name: pip install path still works (Gate 2)
+        working-directory: .
+        run: |
+          python3 -m venv /tmp/pipenv
+          /tmp/pipenv/bin/pip install -q -e tools/
+          /tmp/pipenv/bin/sgfilter --help
 
   ifx:
     name: ifx-release (non-blocking)

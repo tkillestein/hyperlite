@@ -38,9 +38,9 @@ def stage_run(workdir: Path, exe: Path, input_par: Path, seed: int) -> Path:
     """Create a run directory for one ensemble member."""
     rundir = workdir / f'seed{seed:03d}'
     rundir.mkdir(parents=True)
-    for src in (REPO / 'Data').iterdir():
+    for src in (REPO / 'data').iterdir():
         (rundir / src.name).symlink_to(src)
-    for src in (REPO / 'Input').iterdir():
+    for src in (REPO / 'tests' / 'cases' / 'w7').iterdir():
         (rundir / src.name).symlink_to(src)
     (rundir / 'input.str').symlink_to(rundir / 'input_w7.str')
     # -- inject the ensemble seed into the namelist
@@ -76,7 +76,7 @@ def main() -> int:
     ap.add_argument('--exe', type=Path,
                     default=REPO / 'build' / 'gfortran-serial' / 'superlite')
     ap.add_argument('--input-par', type=Path,
-                    default=REPO / 'Input' / 'input.par.lte')
+                    default=REPO / 'tests' / 'cases' / 'w7' / 'input.par.lte')
     ap.add_argument('--n', type=int, default=20, help='ensemble size')
     ap.add_argument('--jobs', type=int, default=4, help='concurrent runs')
     ap.add_argument('--out', type=Path,

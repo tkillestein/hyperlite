@@ -31,7 +31,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
 endif()
 
 #-- dependencies
-find_package(LAPACK REQUIRED)  # dgetrf/dgetri in GAS/physical_opacity_nlte.f
+find_package(LAPACK REQUIRED)  # dgetrf/dgetri in src/gas/physical_opacity_nlte.f
 
 if(HYPERLITE_OPENMP)
   find_package(OpenMP REQUIRED COMPONENTS Fortran)
@@ -39,9 +39,9 @@ endif()
 
 if(HYPERLITE_MPI)
   find_package(MPI REQUIRED COMPONENTS Fortran)
-  configure_file(mpimod_mpi.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
+  configure_file(src/core/mpimod_mpi.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
 else()
-  configure_file(mpimod_ser.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
+  configure_file(src/core/mpimod_ser.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
 endif()
 
 #-- helper: propagate OpenMP/MPI usage to a target
@@ -58,28 +58,28 @@ endfunction()
 # module library (all .mod-producing sources; consumed by every component)
 ########################################################################
 add_library(hyperlite_modules OBJECT
-  elemdatamod.f
-  physconstmod.f
-  randommod.f
+  src/core/elemdatamod.f
+  src/core/physconstmod.f
+  src/core/randommod.f
   ${PROJECT_BINARY_DIR}/mpimod.f
-  miscmod.f
-  ionsmod.f
-  ffxsmod.f
-  bfxsmod.f
-  bbxsmod.f
-  nltemod.f
-  inputparmod.f
-  groupmod.f
-  gridmod.f
-  gasmod.f
-  inputstrmod.f
-  particlemod.f90
-  timingmod.f
-  countersmod.f
-  fluxmod.f
-  totalsmod.f
-  transportmod.f
-  sourcemod.f
+  src/core/miscmod.f
+  src/gas/ionsmod.f
+  src/gas/ffxsmod.f
+  src/gas/bfxsmod.f
+  src/gas/bbxsmod.f
+  src/gas/nltemod.f
+  src/io/inputparmod.f
+  src/group/groupmod.f
+  src/grid/gridmod.f
+  src/gas/gasmod.f
+  src/io/inputstrmod.f
+  src/transport/particlemod.f90
+  src/core/timingmod.f
+  src/core/countersmod.f
+  src/output/fluxmod.f
+  src/output/totalsmod.f
+  src/transport/transportmod.f
+  src/source/sourcemod.f
 )
 hyperlite_target_deps(hyperlite_modules)
 
@@ -93,71 +93,71 @@ function(hyperlite_component name)
 endfunction()
 
 hyperlite_component(hyperlite_misc
-  MISC/binsrch.f90
-  MISC/binsrch_decr.f90
-  MISC/lcase.f
-  MISC/locate.f
-  MISC/memusg.f
-  MISC/sorti.f
-  MISC/specint.f
-  MISC/warn.f
+  src/core/binsrch.f90
+  src/core/binsrch_decr.f90
+  src/core/lcase.f
+  src/core/locate.f
+  src/core/memusg.f
+  src/core/sorti.f
+  src/core/specint.f
+  src/core/warn.f
 )
 
 hyperlite_component(hyperlite_grid
-  GRID/grid_setup.f
-  GRID/grid_volume.f
-  GRID/emitgroup.f
-  GRID/emission_probability.f90
-  GRID/leakage_opacity.f
-  GRID/leakage_opacity11.f90
+  src/grid/grid_setup.f
+  src/grid/grid_volume.f
+  src/grid/emitgroup.f
+  src/grid/emission_probability.f90
+  src/grid/leakage_opacity.f
+  src/grid/leakage_opacity11.f90
 )
 
 hyperlite_component(hyperlite_gas
-  GAS/analytic_opacity.f90
-  GAS/eos_update.f
-  GAS/gas_setup.f
-  GAS/gas_update.f
-  GAS/opacity_planckmean.f
-  GAS/opacity_rossmean.f
-  GAS/physical_opacity.f
-  GAS/physical_opacity_nlte.f
+  src/gas/analytic_opacity.f90
+  src/gas/eos_update.f
+  src/gas/gas_setup.f
+  src/gas/gas_update.f
+  src/gas/opacity_planckmean.f
+  src/gas/opacity_rossmean.f
+  src/gas/physical_opacity.f
+  src/gas/physical_opacity_nlte.f
 )
 
 hyperlite_component(hyperlite_source
-  SOURCE/boundary_source.f90
-  SOURCE/interior_source.f90
-  SOURCE/source_transformdirection.f90
-  SOURCE/sourceenergy.f90
-  SOURCE/sourcenumbers.f90
-  SOURCE/vacancies.f90
+  src/source/boundary_source.f90
+  src/source/interior_source.f90
+  src/source/source_transformdirection.f90
+  src/source/sourceenergy.f90
+  src/source/sourcenumbers.f90
+  src/source/vacancies.f90
 )
 
 hyperlite_component(hyperlite_transport
-  TRANSPORT1/diffusion11.f90
-  TRANSPORT1/transport11.f90
+  src/transport/diffusion11.f90
+  src/transport/transport11.f90
 )
 
 hyperlite_component(hyperlite_output
-  OUTPUT/open_logfiles.f
-  OUTPUT/output_flux.f
-  OUTPUT/output_grid.f
-  OUTPUT/output_grp.f
-  OUTPUT/output_profile.f
-  OUTPUT/output_source.f
+  src/output/open_logfiles.f
+  src/output/output_flux.f
+  src/output/output_grid.f
+  src/output/output_grp.f
+  src/output/output_profile.f
+  src/output/output_source.f
 )
 
 ########################################################################
 # executable
 ########################################################################
 add_executable(superlite
-  superlite.f90
-  banner.f
-  particle_advance.f90
-  fluxtally.f
-  sourcetally.f
-  dealloc_all.f
-  read_bbxs_data.f
-  read_nlte_data.f
+  src/superlite.f90
+  src/banner.f
+  src/transport/particle_advance.f90
+  src/output/fluxtally.f
+  src/source/sourcetally.f
+  src/dealloc_all.f
+  src/gas/read_bbxs_data.f
+  src/gas/read_nlte_data.f
 )
 target_link_libraries(superlite PRIVATE
   hyperlite_modules
