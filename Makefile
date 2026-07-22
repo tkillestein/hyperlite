@@ -32,7 +32,7 @@ FILES := banner.o \
   particle_advance.o fluxtally.o sourcetally.o \
   dealloc_all.o read_bbxs_data.o read_nlte_data.o
 
-LIBRARIES := TRANSPORT1/transport1.a TRANSPORT2/transport2.a TRANSPORT3/transport3.a \
+LIBRARIES := TRANSPORT1/transport1.a \
   SOURCE/source.a GAS/gas.a GRID/grid.a MISC/misc.a OUTPUT/output.a
 SUBDIRS := $(dir $(LIBRARIES))
 SUBCLEAN = $(addsuffix .clean, $(SUBDIRS))
@@ -41,7 +41,7 @@ SUPERLITEDEP := superlite.o $(MODULES) $(FILES) $(LIBRARIES)
 
 SRCDIR := $(dir $(realpath superlite.f90))
 
-GIT_DESCRIBE := $(shell git -C $(SRCDIR) describe --tags --long --dirty)
+GIT_DESCRIBE := $(shell git -C $(SRCDIR) describe --tags --long --dirty --always)
 VERSIONDEP := $(filter-out banner.o, $(SUPERLITEDEP))
 DATE := $(shell date)
 
@@ -67,7 +67,7 @@ all: $(MODULES)
 	@echo "MAKE SUCCESSFUL: $(shell date)"
 
 clean: $(SUBCLEAN)
-	rm -f *.o *.a *.mod version.inc Makefile.dependmod Makefile.depend $(PROGRAMS)
+	rm -f *.o *.a *.mod mpimod.f version.inc Makefile.dependmod Makefile.depend $(PROGRAMS)
 $(SUBCLEAN): %.clean:
 	$(MAKE) -C $* clean
 
@@ -77,6 +77,8 @@ prepare_run:
 	cd $(RUNDIR) && ln -s $(CURDIR)/Data/* .
 	cd $(RUNDIR) && ln -s $(CURDIR)/Input/* .
 	cd $(RUNDIR) && ln -s $(CURDIR)/superlite .
+	cd $(RUNDIR) && ln -sf input.par.lte input.par
+	cd $(RUNDIR) && ln -sf input_w7.str input.str
 
 ready_run: RUNDIR := $(CURDIR)/Run
 ready_run: all prepare_run
@@ -111,12 +113,18 @@ help:
 ########################################################################
 #
 #-- automatic Makefile generation rule
-Makefile.dependmod:
+Makefile.dependmod: mpimod.f
 	$(TOP)/dependmodule.sh $(MODULES) >Makefile.dependmod
 Makefile.depend:
 	$(TOP)/depend.sh $(FILES) >Makefile.depend
 Makefile.compiler:
-	$(error USAGE:  cp System/Makefile.compiler.intel-x86_64 Makefile.compiler)
+	$(error USAGE:  cp System/Makefile.compiler.gfortran Makefile.compiler)
+
+#
+#-- serial/MPI module selection (override with: make MPIMOD=mpi FC=mpif90)
+MPIMOD ?= ser
+mpimod.f: mpimod_$(MPIMOD).f
+	cp -f $< $@
 
 #
 #-- program

@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# hyperlite build artifacts (legacy Make)
+Makefile.compiler
+Makefile.depend
+Makefile.dependmod
+*/Makefile.depend
+mpimod.f
+version.inc
+gitdiff.txt
+superlite
+Run/
+Testsuite/*_Run/
+
+# ensemble/test scratch
+tests/regression/__pycache__/

@@ -116,7 +116,8 @@ program superlite
   call particle_alloc(lmpi0)
 
 !-- initialize random number generator, use different seeds for each rank
-  call rnd_init(in_nomp,impi)
+!-- (in_rnd_seed offsets all ranks jointly for statistically independent ensemble runs)
+  call rnd_init(in_nomp,impi+nmpi*in_rnd_seed)
 !-- use extra stream for non-threaded code
   rnd_state = rnd_states(1)
 

@@ -111,6 +111,15 @@ basis — it lets the speedup work proceed.
   — restore for license/provenance compliance.
 - `Input/` ships `input.par.lte`/`.nlte` but the code opens literal `input.par`;
   the `make run` staging never creates `input.par` → as-shipped `make run` fails.
+- **`nmpi`-dependent bias (found during Phase 0):** a 2-rank run of the smoke
+  case shifts the `eout`/`evelo` split by ~10–30σ relative to the 1-rank
+  ensemble (+1.5% escaped luminosity) while conserving `eout+evelo`. Suspect:
+  per-cell source-particle apportionment across ranks
+  (`SOURCE/sourcenumbers.f90`, `mvol/nmpi` rounding + `max(1,·)` floors)
+  changes per-cell sampling weights. Pre-existing (not introduced by Phase 0 —
+  serial path verified bit-identical). Regression is pinned to `nmpi=1`;
+  **must be root-caused and fixed before Gate 6**, which requires
+  `nmpi∈{1,2}` within MC noise.
 
 **Environment note.** The dev container here has **no Fortran compiler, no MPI,
 no NumPy/h5py**. Building, reference-ensemble generation, and benchmarking must

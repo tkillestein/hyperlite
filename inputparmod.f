@@ -17,6 +17,8 @@ c-- model id and comments
       character(80) :: in_comment = ""  !comment if any
 c-- parallelization
       integer :: in_nomp = 1  !number of openmp threads
+c-- random number generator
+      integer :: in_rnd_seed = 0  !RNG stream offset for ensemble runs (0 reproduces legacy seeding)
 c
 c-- experimental iterative approach
       integer :: in_niter = 1 !number of iterations
@@ -105,6 +107,7 @@ c-- runtime parameter namelist
       namelist /inputpars/
      & in_name,in_comment,
      & in_nomp,
+     & in_rnd_seed,
      & in_niter,
 !grd
      & in_grd_igeom,in_ndim,
@@ -187,6 +190,7 @@ c-- init
 c
       call insertl(in_io_grabstdout,in_l,il)
       call inserti(in_nomp,in_i,ii)
+      call inserti(in_rnd_seed,in_i,ii)
       call inserti(in_niter,in_i,ii)
       call inserti(in_grd_igeom,in_i,ii)
       call inserti(in_ndim(1),in_i,ii)
@@ -332,6 +336,7 @@ c-- write simulation name to file
 c
 c-- check input parameter validity
       if(in_nomp<0) stop 'in_nomp invalid'
+      if(in_rnd_seed<0) stop 'in_rnd_seed invalid'
       if(in_nomp==0 .and. nmpi>1) stop 'no in_nomp==0 in mpi mode'
 c
       if(any(in_ndim<1)) stop 'in_ndim invalid'

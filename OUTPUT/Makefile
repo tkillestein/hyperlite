@@ -7,7 +7,7 @@ include $(TOP)/Makefile.include
 
 LIBRARY = output.a
 FILES = open_logfiles.o output_grid.o output_flux.o \
- 				output_profile.o output_grp.o output_source.0
+ 				output_profile.o output_grp.o output_source.o
 
 .PHONY: all clean
 

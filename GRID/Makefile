@@ -6,7 +6,7 @@ include $(TOP)/Makefile.compiler
 include $(TOP)/Makefile.include
 
 LIBRARY = grid.a
-FILES = grid_setup.o \
+FILES = grid_setup.o grid_volume.o \
   emitgroup.o emission_probability.o leakage_opacity.o \
   leakage_opacity11.o
 

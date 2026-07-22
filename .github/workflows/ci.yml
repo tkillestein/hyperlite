@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: gfortran ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [serial, openmp, mpi]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # git describe for version stamping
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran liblapack-dev libblas-dev
+          if [ "${{ matrix.variant }}" = "mpi" ]; then
+            sudo apt-get install -y libopenmpi-dev openmpi-bin
+          fi
+
+      - name: Install Python test deps
+        run: pip install numpy h5py
+
+      - name: Build
+        run: |
+          cp System/Makefile.compiler.gfortran Makefile.compiler
+          if [ "${{ matrix.variant }}" = "mpi" ]; then
+            make all MPIMOD=mpi FC=mpif90
+          else
+            make all
+          fi
+
+      - name: Stage smoke case
+        run: make ready_run
+
+      - name: Configure variant
+        run: |
+          cd Run
+          rm -f input.par
+          cp ../Input/input.par.lte input.par
+          if [ "${{ matrix.variant }}" = "openmp" ]; then
+            sed -i 's/ in_nomp = 1/ in_nomp = 2/' input.par
+          fi
+
+      - name: Run smoke case
+        run: |
+          cd Run
+          if [ "${{ matrix.variant }}" = "mpi" ]; then
+            mpirun -n 2 --oversubscribe ./superlite | tee stdout.log
+          else
+            ./superlite | tee stdout.log
+          fi
+          grep -q "SuperLite finished" stdout.log
+
+      - name: Regression vs reference ensemble
+        if: matrix.variant == 'serial'
+        run: |
+          test -f tests/regression/reference/smoke.h5 || \
+            { echo "::warning::no committed reference ensemble yet; skipping"; exit 0; }
+          python tests/regression/compare.py Run -v
+
+      - name: Regression self-test (perturbed run must fail)
+        if: matrix.variant == 'serial'
+        run: |
+          test -f tests/regression/reference/smoke.h5 || exit 0
+          python tests/regression/compare.py Run --perturb 0.05
+
+      - name: Upload run outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-outputs-${{ matrix.variant }}
+          path: Run/output.*
+          if-no-files-found: ignore

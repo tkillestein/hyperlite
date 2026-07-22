@@ -1,13 +1,19 @@
-This directory contains a a few test profiles in separate directories,
-each containing an input.str file. The models are described in the SuperLite
-methods paper in detail.
-The directories also contain reference output files from SuperLite runs
-including the output used for the plots in the SuperLite paper.
+This directory contains test profiles in separate directories, each
+containing an input.par and input.str file. The models are described in
+detail in the SuperLite methods paper (Wagle et al. 2023, ApJ 953 132).
 
-w7: A typical SN I-a model of a carbon-oxygen WD from Nomoto et al. 1984
-    at 10d from shock breakout.
+The w7 smoke-test model (a typical SN Ia carbon-oxygen WD model from
+Nomoto et al. 1984 at 10d from shock breakout) ships in the top-level
+Input/ directory and is exercised by `make check` (Testsuite/first/test.sh),
+which validates a run against the committed statistical reference ensemble
+in tests/regression/reference/ (see tests/regression/ for the harness and
+for how to regenerate references).
+
 s18: A typical SN II-P model from Curtis et al. 2021 at 20d after shock breakout
 SN 1999em-like: Another typical SN II-P model at 40d after shock breakout
 A4: A typical SN II-n model at 5d, 10d, 20d, and 30d after maximum in bolometric
-    luminosity
-SN 2017hcc-like: A luminos SN II-n model at 35d after shock breakout
+    luminosity (LTE and NLTE variants)
+SN 2017hcc-like: A luminous SN II-n model at 35d after shock breakout
+
+Note: the in_ndim values in the A4 decks were corrected to match their
+input.str headers (the code refuses mismatched dimensions).
