@@ -24,6 +24,7 @@ c
 c
       subroutine bfxs_read_data
 c------------------------------
+      use hdf5_io
       implicit none
 ************************************************************************
 * Read Verner 1995 (ph1) and 1996 (bf_ph2) data.
@@ -31,7 +32,15 @@ c------------------------------
       character(14),parameter :: fname='data.bf_verner'
       integer :: ne,nz,ns,istat
       real :: ph1d(9,1699),ph2d(9,465)
+      logical :: ok
 c-- read
+      if(h5io_atomdata_h5) then
+       call h5io_ropen('atomic.h5',ok)
+       if(.not.ok) stop 'bfxs_read_data: cannot read atomic.h5'
+       call h5io_read_f2('bf/ph1d',ph1d)
+       call h5io_read_f2('bf/ph2d',ph2d)
+       call h5io_rclose
+      else
       open(4,file=fname,action='read',status='old',
      &  iostat=istat)
       if(istat/=0) stop 'bfxs_read_data: cannot read data.bf_verner'
@@ -42,6 +51,7 @@ c-- read
       read(4,*) !comments
       read(4,*,err=99) ph2d
       close(4)
+      endif !h5io_atomdata_h5
 c-- parse
       bf_ph1 = 0.
       do l=1,1699

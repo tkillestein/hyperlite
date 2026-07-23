@@ -89,18 +89,142 @@ c
 c     ------------------------------------------
       use miscmod, only:lcase
       use elemdatamod, only:elem_data
+      use hdf5_io
       implicit none
       integer,intent(in) :: iz,ii
       integer,intent(out) :: istat
       logical,intent(in) :: get_data
 ************************************************************************
-* Read a single .nlte file with atomic data for nlte calculations,
-* or just poll the number of lines it contains
+* Read a single ion NLTE data set (or just poll its size) from the
+* bundled atomic.h5 (must already be open via h5io_ropen) or, legacy
+* path, from the fixed-format Atoms/data.nlte.* file.
 ************************************************************************
       character(80) :: word
       character(13) :: fname
+      character(11) :: gname
       integer :: l,istat2
       integer(1) :: byte
+c-- h5 read buffers
+      real*4,allocatable :: tmpf(:)
+      integer,allocatable :: tmpi(:),tmpj(:)
+      real*8,allocatable :: tmpa(:),tmpb(:),tmpc(:),tmpd(:)
+c
+      if(h5io_atomdata_h5) then
+c
+c-- group name
+       write(gname,'("nlte/z",i2.2,"i",i2.2)') iz,ii
+       if(.not.h5io_rexists(gname)) then
+        istat = 1
+        if(.not. get_data) write(6,*) 'read_atom_nlte failed:',iz,ii
+        return
+       endif
+       istat = 0
+       call h5io_rattr_i(gname,'nlevel',nlte_nlevel)
+       call h5io_rattr_i(gname,'nline',nlte_nline)
+       call h5io_rattr_i(gname,'ncoll',coll_nline)
+c-- poll ready, return
+       if(.not.get_data) return
+c
+c-- allocate
+       allocate(nlte_level(nlte_nlevel),nlte_line(nlte_nline))
+       allocate(coll_line(coll_nline),pi_rr_data(nlte_nlevel))
+c
+c-- level data
+       allocate(tmpi(nlte_nlevel),tmpj(nlte_nlevel))
+       allocate(tmpa(nlte_nlevel))
+       call h5io_read_i1(gname//'/lev_id',tmpi)
+       call h5io_read_i1(gname//'/lev_g',tmpj)
+       call h5io_read_d1(gname//'/lev_chi',tmpa)
+       do l=1,nlte_nlevel
+        nlte_level(l)%id = tmpi(l)
+        nlte_level(l)%g = tmpj(l)
+        nlte_level(l)%chi = tmpa(l)
+       enddo !l
+       call h5io_read_i1(gname//'/lev_n',tmpi)
+       do l=1,nlte_nlevel
+        nlte_level(l)%n = tmpi(l)
+       enddo !l
+       deallocate(tmpi,tmpj,tmpa)
+c-- radiative line data
+       allocate(tmpi(nlte_nline),tmpj(nlte_nline))
+       allocate(tmpa(nlte_nline),tmpb(nlte_nline))
+       call h5io_read_i1(gname//'/lin_lev1',tmpi)
+       call h5io_read_i1(gname//'/lin_lev2',tmpj)
+       call h5io_read_d1(gname//'/lin_f',tmpa)
+       call h5io_read_d1(gname//'/lin_wl0',tmpb)
+       do l=1,nlte_nline
+        nlte_line(l)%lev1 = tmpi(l)
+        nlte_line(l)%lev2 = tmpj(l)
+        nlte_line(l)%f = tmpa(l)
+        nlte_line(l)%wl0 = tmpb(l)
+       enddo !l
+       deallocate(tmpi,tmpj,tmpa,tmpb)
+c-- electron-impact excitation data
+       allocate(tmpi(coll_nline),tmpj(coll_nline))
+       allocate(tmpa(coll_nline),tmpb(coll_nline))
+       allocate(tmpc(coll_nline),tmpd(coll_nline))
+       allocate(tmpf(coll_nline))
+       call h5io_read_i1(gname//'/coll_lev1',tmpi)
+       call h5io_read_i1(gname//'/coll_lev2',tmpj)
+       call h5io_read_d1(gname//'/coll_C0',tmpa)
+       call h5io_read_d1(gname//'/coll_C1',tmpb)
+       call h5io_read_d1(gname//'/coll_C2',tmpc)
+       call h5io_read_d1(gname//'/coll_C3',tmpd)
+       call h5io_read_f1(gname//'/coll_n',tmpf)
+       do l=1,coll_nline
+        coll_line(l)%lev1 = tmpi(l)
+        coll_line(l)%lev2 = tmpj(l)
+        coll_line(l)%C0 = tmpa(l)
+        coll_line(l)%C1 = tmpb(l)
+        coll_line(l)%C2 = tmpc(l)
+        coll_line(l)%C3 = tmpd(l)
+        coll_line(l)%n_coll = tmpf(l)
+       enddo !l
+       call h5io_read_d1(gname//'/coll_delE',tmpa)
+       do l=1,coll_nline
+        coll_line(l)%delE = tmpa(l)
+       enddo !l
+       deallocate(tmpi,tmpj,tmpa,tmpb,tmpc,tmpd,tmpf)
+c-- PI/RR transition data
+       allocate(tmpi(nlte_nlevel),tmpf(nlte_nlevel))
+       allocate(tmpa(nlte_nlevel),tmpb(nlte_nlevel))
+       allocate(tmpc(nlte_nlevel),tmpd(nlte_nlevel))
+       call h5io_read_i1(gname//'/pi_lev',tmpi)
+       do l=1,nlte_nlevel
+        pi_rr_data(l)%lev = tmpi(l)
+       enddo !l
+       call h5io_read_d1(gname//'/rr_C0',tmpa)
+       call h5io_read_d1(gname//'/rr_C1',tmpb)
+       call h5io_read_d1(gname//'/rr_C2',tmpc)
+       call h5io_read_d1(gname//'/rr_C3',tmpd)
+       call h5io_read_f1(gname//'/rr_n',tmpf)
+       do l=1,nlte_nlevel
+        pi_rr_data(l)%C0_RR = tmpa(l)
+        pi_rr_data(l)%C1_RR = tmpb(l)
+        pi_rr_data(l)%C2_RR = tmpc(l)
+        pi_rr_data(l)%C3_RR = tmpd(l)
+        pi_rr_data(l)%n_RR = tmpf(l)
+       enddo !l
+       call h5io_read_d1(gname//'/pi_C0',tmpa)
+       call h5io_read_d1(gname//'/pi_C1',tmpb)
+       call h5io_read_d1(gname//'/pi_C2',tmpc)
+       call h5io_read_d1(gname//'/pi_C3',tmpd)
+       call h5io_read_f1(gname//'/pi_n',tmpf)
+       do l=1,nlte_nlevel
+        pi_rr_data(l)%C0_PI = tmpa(l)
+        pi_rr_data(l)%C1_PI = tmpb(l)
+        pi_rr_data(l)%C2_PI = tmpc(l)
+        pi_rr_data(l)%C3_PI = tmpd(l)
+        pi_rr_data(l)%n_PI = tmpf(l)
+       enddo !l
+       call h5io_read_d1(gname//'/pi_delE',tmpa)
+       do l=1,nlte_nlevel
+        pi_rr_data(l)%delE = tmpa(l)
+       enddo !l
+       deallocate(tmpi,tmpa,tmpb,tmpc,tmpd,tmpf)
+       return
+c
+      endif !h5io_atomdata_h5
 c
 c-- filename
       write(fname,'("data.nlte.",a,i1)')

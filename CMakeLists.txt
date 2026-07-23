@@ -191,6 +191,21 @@ install(TARGETS superlite RUNTIME DESTINATION bin)
 enable_testing()
 find_package(Python3 COMPONENTS Interpreter)
 
+if(Python3_FOUND AND HYPERLITE_HDF5)
+  #-- bundled atomic data, generated from the raw ASCII (needs python3 h5py)
+  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/data/atomic.h5
+    COMMAND Python3::Interpreter
+            ${PROJECT_SOURCE_DIR}/tools/hyperlite_tools/build_atomic_h5.py
+            -d ${PROJECT_SOURCE_DIR}/data
+    DEPENDS ${PROJECT_SOURCE_DIR}/tools/hyperlite_tools/build_atomic_h5.py
+            ${PROJECT_SOURCE_DIR}/data/data.ion
+            ${PROJECT_SOURCE_DIR}/data/data.zeta
+            ${PROJECT_SOURCE_DIR}/data/data.bf_verner
+            ${PROJECT_SOURCE_DIR}/data/data.ff_sutherland
+    COMMENT "Generating data/atomic.h5")
+  add_custom_target(atomic_h5 ALL DEPENDS ${PROJECT_SOURCE_DIR}/data/atomic.h5)
+endif()
+
 if(Python3_FOUND)
   set(SMOKE_RUNDIR ${PROJECT_BINARY_DIR}/smoke_run)
 

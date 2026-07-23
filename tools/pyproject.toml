@@ -24,6 +24,7 @@ Homepage = "https://github.com/tkillestein/hyperlite"
 sgfilter = "hyperlite_tools.sgfilter:main"
 wlgenadd = "hyperlite_tools.wlgenadd:main"
 h5-to-ascii = "hyperlite_tools.h5_to_ascii:main"
+build-atomic-h5 = "hyperlite_tools.build_atomic_h5:main"
 stella2superlite = "hyperlite_tools._run:stella2superlite"
 parse-hdf5-sndata = "hyperlite_tools._run:parse_hdf5_sndata"
 

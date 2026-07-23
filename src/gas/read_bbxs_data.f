@@ -7,6 +7,7 @@ c     --------------------------------
       use bbxsmod
       use timingmod
       use miscmod, only:warn
+      use hdf5_io, only:h5io_ropen,h5io_rclose,h5io_atomdata_h5
       implicit none
       integer,intent(in) :: nelem
 ************************************************************************
@@ -16,11 +17,18 @@ c     --------------------------------
       integer :: nlinall,ilinall
       integer :: l,iz,ii,istat,llw,lhg,n
       real*8 :: t0,t1
+      logical :: ok
 c
 c-- quick exit
       if(nelem==0) then
        call warn('read_bbxs_data','nelem==0: no lines read')
        return
+      endif
+c
+c-- open bundled atomic data
+      if(h5io_atomdata_h5) then
+       call h5io_ropen('atomic.h5',ok)
+       if(.not.ok) stop 'read_bbxs_data: cannot read atomic.h5'
       endif
 c
 c-- determine total number of lines
@@ -86,6 +94,9 @@ c-- store counter globally
 c
 c-- sort lines - doesn't speed-up bb opacity.
       call sort_lines
+c
+c-- done with bundled atomic data
+      if(h5io_atomdata_h5) call h5io_rclose
 c
       t1 = t_time()
 !     write(6,'(a,f8.2,a)') ' time used for bbxs reading:',t1-t0,'s'

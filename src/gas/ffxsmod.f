@@ -27,16 +27,25 @@ c
 c
       subroutine ffxs_read_data
 c     -------------------------
+      use hdf5_io
       implicit none
 ************************************************************************
 * Read sutherland data
 ************************************************************************
       character(18),parameter :: fname='data.ff_sutherland'
       integer :: istat
+      logical :: ok
 c
       real*8 :: gff_raw(3,ff_nu,ff_ngg)
 c
 c-- read
+      if(h5io_atomdata_h5) then
+       call h5io_ropen('atomic.h5',ok)
+       if(.not.ok) stop 'ffxs_read_data: cannot read atomic.h5'
+       call h5io_read_d2('ff/gff',ff_gff)
+       call h5io_rclose
+       return
+      endif !h5io_atomdata_h5
       open(4,file=fname,action='read',status='old',
      &  iostat=istat)
       if(istat/=0) stop 'ffxs_read_data: cannot read ff_sutherland.dat'

@@ -19,9 +19,22 @@ module hdf5_io
   public :: h5io_write_d1, h5io_write_d2, h5io_write_i3
   public :: h5io_append_d1, h5io_append_i1
   public :: h5io_append_d2, h5io_append_i2, h5io_append_r2
+  public :: h5io_ropen, h5io_rclose, h5io_rexists
+  public :: h5io_rattr_i
+  public :: h5io_read_i1, h5io_read_d1, h5io_read_f1
+  public :: h5io_read_d2, h5io_read_f2
+
+!-- whether this build has real HDF5 support (stub sets .false.)
+  logical, parameter, public :: h5io_available = .true.
+!-- runtime switch: read atomic data from atomic.h5 (set from
+!-- in_io_atomdata by inputparmod; lives here to avoid module cycles)
+  logical, public :: h5io_atomdata_h5 = .false.
 
   integer(hid_t) :: fid = -1
   logical :: lopen = .false.
+!-- separate handle for read-only files (atomic data)
+  integer(hid_t) :: rfid = -1
+  logical :: lropen = .false.
 
 contains
 
@@ -304,6 +317,150 @@ contains
     call chkerr(ierr, 'append_r2 '//path)
     call append_done(did, fspace, mspace)
   end subroutine h5io_append_r2
+
+!-- read-only access (atomic data)
+!================================
+  subroutine h5io_ropen(fname, ok)
+    character(*), intent(in) :: fname
+    logical, intent(out) :: ok
+    integer :: ierr
+    call h5open_f(ierr)
+    call chkerr(ierr, 'h5open '//fname)
+    call h5eset_auto_f(0, ierr) !suppress error stack for missing file
+    call h5fopen_f(fname, H5F_ACC_RDONLY_F, rfid, ierr)
+    call h5eset_auto_f(1, ierr)
+    ok = ierr == 0
+    lropen = ok
+  end subroutine h5io_ropen
+
+  subroutine h5io_rclose
+    integer :: ierr
+    if(.not.lropen) return
+    call h5fclose_f(rfid, ierr)
+    call chkerr(ierr, 'rclose')
+    lropen = .false.
+!-- close the library only if no write file is open
+    if(.not.lopen) call h5close_f(ierr)
+  end subroutine h5io_rclose
+
+  function h5io_rexists(path) result(lexist)
+    character(*), intent(in) :: path
+    logical :: lexist
+    integer :: ierr, i, n
+    character(len(path)) :: sub
+!-- h5lexists on a nested path requires each parent link to exist
+    n = len_trim(path)
+    lexist = .true.
+    do i = 2, n
+      if(path(i:i) == '/') then
+        sub = path(:i-1)
+        call h5lexists_f(rfid, trim(sub), lexist, ierr)
+        if(ierr /= 0 .or. .not.lexist) then
+          lexist = .false.
+          return
+        endif
+      endif
+    enddo
+    call h5lexists_f(rfid, path, lexist, ierr)
+    if(ierr /= 0) lexist = .false.
+  end function h5io_rexists
+
+  subroutine h5io_rattr_i(path, name, ival)
+    character(*), intent(in) :: path, name
+    integer, intent(out) :: ival
+    integer(hid_t) :: oid, aid
+    integer(hsize_t) :: dims(1)
+    integer :: ierr
+    dims(1) = 1
+    call h5oopen_f(rfid, path, oid, ierr)
+    call chkerr(ierr, 'rattr open '//path)
+    call h5aopen_f(oid, name, aid, ierr)
+    call chkerr(ierr, 'rattr '//name)
+    call h5aread_f(aid, H5T_NATIVE_INTEGER, ival, dims, ierr)
+    call chkerr(ierr, 'rattr read '//name)
+    call h5aclose_f(aid, ierr)
+    call h5oclose_f(oid, ierr)
+  end subroutine h5io_rattr_i
+
+  subroutine read_open(path, rank, did, dims)
+    character(*), intent(in) :: path
+    integer, intent(in) :: rank
+    integer(hid_t), intent(out) :: did
+    integer(hsize_t), intent(out) :: dims(rank)
+    integer(hid_t) :: sid
+    integer(hsize_t) :: maxdims(rank)
+    integer :: ierr
+    call h5dopen_f(rfid, path, did, ierr)
+    call chkerr(ierr, 'read open '//path)
+    call h5dget_space_f(did, sid, ierr)
+    call h5sget_simple_extent_dims_f(sid, dims, maxdims, ierr)
+    call h5sclose_f(sid, ierr)
+  end subroutine read_open
+
+  subroutine h5io_read_i1(path, arr)
+    character(*), intent(in) :: path
+    integer, intent(out) :: arr(:)
+    integer(hid_t) :: did
+    integer(hsize_t) :: dims(1)
+    integer :: ierr
+    call read_open(path, 1, did, dims)
+    if(dims(1) /= size(arr)) call chkerr(1, 'read_i1 size '//path)
+    call h5dread_f(did, H5T_NATIVE_INTEGER, arr, dims, ierr)
+    call chkerr(ierr, 'read_i1 '//path)
+    call h5dclose_f(did, ierr)
+  end subroutine h5io_read_i1
+
+  subroutine h5io_read_d1(path, arr)
+    character(*), intent(in) :: path
+    real*8, intent(out) :: arr(:)
+    integer(hid_t) :: did
+    integer(hsize_t) :: dims(1)
+    integer :: ierr
+    call read_open(path, 1, did, dims)
+    if(dims(1) /= size(arr)) call chkerr(1, 'read_d1 size '//path)
+    call h5dread_f(did, H5T_NATIVE_DOUBLE, arr, dims, ierr)
+    call chkerr(ierr, 'read_d1 '//path)
+    call h5dclose_f(did, ierr)
+  end subroutine h5io_read_d1
+
+  subroutine h5io_read_f1(path, arr)
+    character(*), intent(in) :: path
+    real*4, intent(out) :: arr(:)
+    integer(hid_t) :: did
+    integer(hsize_t) :: dims(1)
+    integer :: ierr
+    call read_open(path, 1, did, dims)
+    if(dims(1) /= size(arr)) call chkerr(1, 'read_f1 size '//path)
+    call h5dread_f(did, H5T_NATIVE_REAL, arr, dims, ierr)
+    call chkerr(ierr, 'read_f1 '//path)
+    call h5dclose_f(did, ierr)
+  end subroutine h5io_read_f1
+
+  subroutine h5io_read_d2(path, arr)
+    character(*), intent(in) :: path
+    real*8, intent(out) :: arr(:,:)
+    integer(hid_t) :: did
+    integer(hsize_t) :: dims(2)
+    integer :: ierr
+    call read_open(path, 2, did, dims)
+    if(any(dims /= shape(arr))) call chkerr(1, 'read_d2 size '//path)
+    call h5dread_f(did, H5T_NATIVE_DOUBLE, arr, dims, ierr)
+    call chkerr(ierr, 'read_d2 '//path)
+    call h5dclose_f(did, ierr)
+  end subroutine h5io_read_d2
+
+  subroutine h5io_read_f2(path, arr)
+    character(*), intent(in) :: path
+    real*4, intent(out) :: arr(:,:)
+    integer(hid_t) :: did
+    integer(hsize_t) :: dims(2)
+    integer :: ierr
+    call read_open(path, 2, did, dims)
+    if(any(dims /= shape(arr))) call chkerr(1, 'read_f2 size '//path)
+    call h5dread_f(did, H5T_NATIVE_REAL, arr, dims, ierr)
+    call chkerr(ierr, 'read_f2 '//path)
+    call h5dclose_f(did, ierr)
+  end subroutine h5io_read_f2
 
 end module hdf5_io
 ! vim: fdm=marker

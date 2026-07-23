@@ -43,19 +43,69 @@ c
 c     ------------------------------------------
       use miscmod, only:lcase
       use elemdatamod, only:elem_data
+      use hdf5_io
       implicit none
       integer,intent(in) :: iz,ii
       integer,intent(out) :: istat
       logical,intent(in) :: get_data
 ************************************************************************
-* Read a single .atom file, or just poll how many lines it contains.
+* Read a single ion line list (or just poll its size) from the bundled
+* atomic.h5 (must already be open via h5io_ropen) or, legacy path, from
+* the fixed-format Atoms/data.atom.* file.
 ************************************************************************
       character(80) :: word
       character(13) :: fname
+      character(11) :: gname
 c-- level id
       integer :: l,lidmax,istat2
       integer,allocatable :: lid(:)
       integer(1) :: byte
+c-- h5 read buffers
+      real*4,allocatable :: tmpf(:)
+      integer,allocatable :: tmpi(:),tmpj(:)
+c
+      if(h5io_atomdata_h5) then
+c
+c-- group name
+       write(gname,'("bbxs/z",i2.2,"i",i2.2)') iz,ii
+       if(.not.h5io_rexists(gname)) then
+        istat = 1
+        if(.not. get_data) write(6,*) 'read_atom failed:',iz,ii
+        return
+       endif
+       istat = 0
+       call h5io_rattr_i(gname,'nlevel',bb_nlevel)
+       call h5io_rattr_i(gname,'nline',bb_nline)
+c-- poll ready, return
+       if(.not. get_data) return
+c
+c-- allocate
+       allocate(bbxs_level(bb_nlevel),bbxs_line(bb_nline))
+c
+c-- level data
+       allocate(tmpf(bb_nlevel),tmpi(bb_nlevel),tmpj(bb_nlevel))
+       call h5io_read_f1(gname//'/lev_chi',tmpf)
+       call h5io_read_i1(gname//'/lev_id',tmpi)
+       call h5io_read_i1(gname//'/lev_g',tmpj)
+       do l=1,bb_nlevel
+        bbxs_level(l)%chi = tmpf(l)
+        bbxs_level(l)%id = tmpi(l)
+        bbxs_level(l)%g = tmpj(l)
+       enddo !l
+       deallocate(tmpf,tmpi,tmpj)
+c-- line data
+       allocate(tmpf(bb_nline),tmpi(bb_nline),tmpj(bb_nline))
+       call h5io_read_i1(gname//'/lin_lev1',tmpi)
+       call h5io_read_i1(gname//'/lin_lev2',tmpj)
+       call h5io_read_f1(gname//'/lin_f',tmpf)
+       do l=1,bb_nline
+        bbxs_line(l)%lev1 = tmpi(l)
+        bbxs_line(l)%lev2 = tmpj(l)
+        bbxs_line(l)%f = tmpf(l)
+       enddo !l
+       deallocate(tmpf,tmpi,tmpj)
+c
+      else !h5io_atomdata_h5
 c
 c-- filename
       write(fname,'("data.atom.",a,i1)')
@@ -96,6 +146,9 @@ c-- verify eof
        write(6,*) fname,byte
        stop 'read_atom: data remaining on input file'
       endif
+      close(4)
+c
+      endif !h5io_atomdata_h5
 c
 c-- construct reverse level pointer
       lidmax = maxval(bbxs_level(:)%id)
@@ -110,6 +163,7 @@ c-- fix level id
        bbxs_line(l)%lev2 = lid(bbxs_line(l)%lev2)
       enddo !l
       deallocate(lid)
+      return
 c
 67    continue
       close(4)

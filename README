@@ -18,6 +18,12 @@ Python 3 + numpy/h5py for the regression tests.
 Layout: Fortran sources live under src/ (core/io/grid/gas/group/source/
 transport/output), atomic data under data/, test decks under tests/cases/.
 
+I/O: runs write a self-describing output.h5 (plus the legacy ASCII
+tables while in_io_ascii = t). Atomic data is read from data/atomic.h5,
+generated at build time from the raw ASCII by tools (requires python3 +
+h5py); set in_io_atomdata = 'asci' to use the legacy fixed-format files
+and Atoms/ directory instead.
+
 The Python tools (stella2superlite, sgfilter, wlgenadd, parse-hdf5-sndata)
 are packaged as hyperlite-tools:
 

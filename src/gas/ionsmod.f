@@ -653,6 +653,7 @@ c
 c     ----------------------------------
       use physconstmod
       use bbxsmod
+      use hdf5_io, only:h5io_atomdata_h5
       implicit none
       integer,intent(in) :: nelem_in
 ************************************************************************
@@ -693,6 +694,11 @@ c-- allocate data structure
         ion_el(iz)%i(l)%q = 0d0
        endforall
       enddo
+c
+c-- read from the bundled hdf5 atomic data
+      if(h5io_atomdata_h5) then
+       call ions_read_data_h5
+      else
 c
 c-- open file
       open(4,file=fname,action='read',status='old',iostat=istat)
@@ -779,6 +785,8 @@ c-- read zeta values
 c-- done
       close(4)
 c
+      endif !h5io_atomdata_h5
+c
 c
 c-- remove empty ions
       ion_iionmax = 0
@@ -827,6 +835,88 @@ c-- output
       enddo
 c
       end subroutine ions_read_data
+c
+c
+c
+      subroutine ions_read_data_h5
+c     ----------------------------
+      use physconstmod
+      use hdf5_io
+      implicit none
+************************************************************************
+* read ionization/level data and zeta table from atomic.h5 (see
+* tools/hyperlite_tools/build_atomic_h5.py for the schema).  Fills the
+* same ion_el structure as the legacy ASCII reader; units converted
+* identically ([cm^-1] -> [erg] via h*c).
+************************************************************************
+      integer :: nion,ntot,ntemp,nzeta
+      integer :: l,ll,iz,ii,icod,nlev,ioff
+      logical :: ok
+      integer,allocatable :: icodv(:),nlevv(:),offv(:),gv(:),metav(:)
+      integer,allocatable :: izv(:),iiv(:)
+      real*8,allocatable :: chiionv(:),chiv(:),zval(:,:)
+c
+      call h5io_ropen('atomic.h5',ok)
+      if(.not.ok) stop 'ions_read_data: cannot read atomic.h5'
+c
+c-- ion/level data
+      call h5io_rattr_i('ion','nion',nion)
+      allocate(icodv(nion),nlevv(nion),offv(nion),chiionv(nion))
+      call h5io_read_i1('ion/icod',icodv)
+      call h5io_read_i1('ion/nlev',nlevv)
+      call h5io_read_i1('ion/offset',offv)
+      call h5io_read_d1('ion/chi_ion',chiionv)
+      ntot = offv(nion) + nlevv(nion) - 1
+      allocate(chiv(ntot),gv(ntot),metav(ntot))
+      call h5io_read_d1('ion/lev_chi',chiv)
+      call h5io_read_i1('ion/lev_g',gv)
+      call h5io_read_i1('ion/lev_meta',metav)
+      do ll=1,nion
+       icod = icodv(ll)
+       iz = icod/100  !element number
+       ii = icod - 100*iz + 1 !ion number, starting from 1 for charge neutral atom
+       if(iz>nelem) cycle
+       ion_el(iz)%i(ii)%e = pc_h*pc_c*chiionv(ll)
+       nlev = nlevv(ll)
+       ioff = offv(ll)
+       ion_el(iz)%i(ii)%nlev = nlev
+       allocate(ion_el(iz)%i(ii)%elev(nlev))
+       allocate(ion_el(iz)%i(ii)%glev(nlev))
+       allocate(ion_el(iz)%i(ii)%meta(nlev))
+       do l=1,nlev
+        ion_el(iz)%i(ii)%elev(l) = pc_h*pc_c*chiv(ioff+l-1)
+        ion_el(iz)%i(ii)%glev(l) = gv(ioff+l-1)
+        ion_el(iz)%i(ii)%meta(l) = metav(ioff+l-1)/=0
+       enddo !l
+      enddo !ll
+      deallocate(icodv,nlevv,offv,chiionv,chiv,gv,metav)
+c
+c-- zeta data !nebular approximation
+      call h5io_rattr_i('zeta','ntemp',ntemp)
+      call h5io_rattr_i('zeta','nzeta',nzeta)
+      allocate(zeta_temp(ntemp))
+      call h5io_read_d1('zeta/temp',zeta_temp)
+      do iz=1,nelem
+        do ii=1,iz+1
+          allocate(ion_el(iz)%i(ii)%zval(ntemp))
+          ion_el(iz)%i(ii)%zval = 0d0
+        enddo
+      enddo
+      allocate(izv(nzeta),iiv(nzeta),zval(ntemp,nzeta))
+      call h5io_read_i1('zeta/iz',izv)
+      call h5io_read_i1('zeta/ii',iiv)
+      call h5io_read_d2('zeta/val',zval)
+      do l=1,nzeta
+        iz = izv(l)
+        ii = iiv(l)
+        if(iz>nelem) cycle
+        ion_el(iz)%i(ii)%zval = zval(:,l)
+      enddo !l
+      deallocate(izv,iiv,zval)
+c
+      call h5io_rclose
+c
+      end subroutine ions_read_data_h5
 c
       end module ionsmod
 c vim: fdm=marker

@@ -103,6 +103,7 @@ c-- output
       logical :: in_io_profdump = .false.  !write profile to file at the end
       logical :: in_io_debugging = .false. !sets nogriddump to false, opacdump,pdensdump,dogrdtally,profdump to true
       logical :: in_io_ascii = .true.  !write legacy ASCII output files alongside output.h5
+      character(4) :: in_io_atomdata = 'h5  ' !h5|asci: atomic data source (atomic.h5 or legacy fixed-format files + Atoms/)
 c
 c-- runtime parameter namelist
       namelist /inputpars/
@@ -141,7 +142,7 @@ c-- runtime parameter namelist
      & in_io_nogriddump,in_io_dogrdtally,
      & in_io_opacdump,in_io_pdensdump,
      & in_io_profdump,in_io_debugging,
-     & in_io_ascii
+     & in_io_ascii,in_io_atomdata
 c
 c-- pointers
 c
@@ -246,6 +247,7 @@ c
       call insertl(in_io_profdump,in_l,il)
       call insertl(in_io_debugging,in_l,il)
       call insertl(in_io_ascii,in_l,il)
+      call insertc(in_io_atomdata,in_c,ic)
 c
       contains
 c
@@ -317,6 +319,7 @@ c
       subroutine parse_inputpars(nmpi)
 c     --------------------------------
       use miscmod, only:warn
+      use hdf5_io, only:h5io_available,h5io_atomdata_h5
 c$    use omp_lib
       implicit none
       integer,intent(in) :: nmpi
@@ -360,6 +363,12 @@ c
         in_io_pdensdump = 'on'
         in_io_dogrdtally = .true.
       endif
+c
+      if(in_io_atomdata/='h5' .and. in_io_atomdata/='asci') stop
+     &   'in_io_atomdata invalid: h5|asci'
+      if(in_io_atomdata=='h5' .and. .not.h5io_available) stop
+     &   'in_io_atomdata=h5 but built without HDF5: set asci'
+      h5io_atomdata_h5 = in_io_atomdata=='h5'
 c
       if(in_io_nogriddump .and. in_io_dogrdtally) stop
      &   'dogridtally and !griddump'
@@ -461,6 +470,7 @@ c     -------------------------------------
       use gasmod
       use gridmod
       use nltemod
+      use hdf5_io, only:h5io_atomdata_h5
       implicit none
       integer,intent(in) :: nmpi
 ************************************************************************
@@ -469,6 +479,9 @@ c     -------------------------------------
 ************************************************************************
       integer :: mpart
       integer :: ns
+c
+c-- atomic-data source switch (module-cycle-free home in hdf5_io)
+      h5io_atomdata_h5 = in_io_atomdata=='h5'
 c
       mpart = int(int(2,8)**in_src_n2s/nmpi) !max number of particles
       mpart = max(mpart,in_src_ns/nmpi)

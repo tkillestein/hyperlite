@@ -9,6 +9,7 @@ c     --------------------------------
       use timingmod
       use inputparmod
       use miscmod, only:warn
+      use hdf5_io, only:h5io_ropen,h5io_rclose,h5io_atomdata_h5
       implicit none
       integer,intent(in) :: nelem,nlte_nel
 ************************************************************************
@@ -22,10 +23,17 @@ c     --------------------------------
       integer :: nlinall,ilinall,nlinnlte,ilinnlte
       integer :: il,l,iz,ii,istat,llw,lhg,n!,n1
       real*8 :: t0,t1
+      logical :: ok
 c-- quick exit
       if(nlte_nel.gt.1) then
        stop 'read_nlte_data: no NLTE calculations for Z>1'
        return
+      endif
+c
+c-- open bundled atomic data
+      if(h5io_atomdata_h5) then
+       call h5io_ropen('atomic.h5',ok)
+       if(.not.ok) stop 'read_nlte_data: cannot read atomic.h5'
       endif
 c
 c-- allocate permanent NLTE data structure
@@ -286,6 +294,9 @@ c-- store counter globally
 c
 c-- sort lines - doesn't speed-up bb opacity.
       call sort_lines
+c
+c-- done with bundled atomic data
+      if(h5io_atomdata_h5) call h5io_rclose
 c
       t1 = t_time()
 !     write(6,'(a,f8.2,a)') ' time used for nlte reading:',t1-t0,'s'

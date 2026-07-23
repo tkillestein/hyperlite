@@ -36,6 +36,7 @@ Both run in CI on every push.
 | `wlgenadd` | Generate an `input.wlgrid` (or `input.fluxwl`) custom wavelength grid |
 | `parse-hdf5-sndata` | Coarsen HDF5 (FLASH-style block AMR) supernova data and convert to ASCII |
 | `h5-to-ascii` | Export a hyperlite `output.h5` back to the legacy `output.*` ASCII tables |
+| `build-atomic-h5` | Bundle the raw ASCII atomic data into `data/atomic.h5` (also run by CMake) |
 
 Each accepts `--help`. `hyperlite_tools.myfuncts` provides shared helper
 functions (Stella profile loading, safe logs, file editing).

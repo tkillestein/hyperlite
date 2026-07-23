@@ -102,6 +102,7 @@ c-- ndim=1 alloc
       allocate(gas_sig(gas_ncell))
       allocate(gas_capgrey(gas_ncell))
       allocate(gas_capemitgrey(gas_ncell))
+      gas_capemitgrey = 0d0 !only computed in NLTE mode, but always dumped
       allocate(gas_capross(gas_ncell))
 c
       allocate(gas_eraddens(gas_ncell))
@@ -117,6 +118,7 @@ c
 c-- ndim=2 alloc big
       allocate(gas_cap(ng,gas_ncell))
       allocate(gas_capemit(ng,gas_ncell))
+      gas_capemit = 0. !only computed in NLTE mode, but always dumped
       allocate(gas_emiss(ng,gas_ncell))
       allocate(gas_jrad(ng,gas_ncell))
 
