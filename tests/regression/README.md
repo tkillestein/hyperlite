@@ -7,7 +7,11 @@ threading, reordering) without losing regression coverage, the reference is a
 
 ## Files
 
-- `sloutput.py` — parsers for the ASCII `output.*` files.
+- `sloutput.py` — parsers for the run outputs: the ASCII `output.*` tables
+  and, via `read_run(dir, source='h5')`, the HDF5 `output.h5` (both yield
+  identically-shaped fields).
+- `roundtrip.py` — requires the HDF5 and ASCII outputs of the *same* run to
+  agree to ASCII formatting precision (~5 significant digits).
 - `make_reference.py` — runs the smoke case N times with distinct
   `in_rnd_seed` values and stores per-bin ensemble mean/std plus the
   deterministic anchors in `reference/smoke.h5`.
@@ -41,12 +45,14 @@ The reference records `(code version, date, n_ensemble, nmpi, nomp, case)` in
 ## Checking a run
 
 ```bash
-ctest --preset gfortran-openmp   # smoke-run + regression-smoke + regression-selftest
+ctest --preset gfortran-openmp   # smoke-run + regression-smoke[-h5] + roundtrip + selftest
 ```
 
 or manually against any run directory:
 
 ```bash
 python tests/regression/compare.py RUNDIR -v          # exit 0 = pass
+python tests/regression/compare.py RUNDIR --source h5 -v  # read output.h5 instead
 python tests/regression/compare.py RUNDIR --perturb 0.05  # self-test: must fail
+python tests/regression/roundtrip.py RUNDIR           # h5 <-> ascii agreement
 ```

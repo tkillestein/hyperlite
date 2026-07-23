@@ -44,12 +44,20 @@ def read_array(path: str | Path) -> np.ndarray:
     return np.vstack(rows).squeeze()
 
 
-def read_run(rundir: str | Path) -> dict[str, np.ndarray]:
+def read_run(rundir: str | Path, source: str = 'ascii') -> dict[str, np.ndarray]:
     """Parse the fields of one run directory used by the regression test.
 
     Returns a dict with deterministic anchors (grid/group/flux axes) and
     stochastic fields (spectra, temperatures, energy totals).
+
+    ``source`` selects the output format: ``'ascii'`` parses the legacy
+    ``output.*`` tables, ``'h5'`` reads ``output.h5`` directly.  Both give
+    identically-shaped fields (HDF5 at full precision, ASCII at ~5 digits).
     """
+    if source == 'h5':
+        return read_run_h5(rundir)
+    if source != 'ascii':
+        raise ValueError(f'unknown source {source!r}')
     rundir = Path(rundir)
     out: dict[str, np.ndarray] = {}
 
@@ -68,6 +76,38 @@ def read_run(rundir: str | Path) -> dict[str, np.ndarray]:
 
     # -- energy totals: single row [eout, evelo, sflux, sthermal]
     out['tot_energy'] = np.atleast_1d(read_array(rundir / 'output.tot_energy'))
+
+    # -- derived integrated quantities
+    out['L_tot'] = np.atleast_1d(out['flx_luminos'].sum())
+    return out
+
+
+def read_run_h5(rundir: str | Path) -> dict[str, np.ndarray]:
+    """Read the regression fields from a run's ``output.h5``.
+
+    Field shapes mirror the (squeezed) ASCII parser output so both formats
+    can be compared against the same reference ensemble.
+    """
+    import h5py
+
+    out: dict[str, np.ndarray] = {}
+    with h5py.File(Path(rundir) / 'output.h5', 'r') as f:
+        # -- deterministic anchors
+        out['flx_wl'] = f['flux/wl'][()]
+        out['flx_mu'] = f['flux/mu'][()]
+        out['grp_wl'] = f['group/wl'][()]
+        out['grd_xarr'] = f['grid/xarr'][()]
+
+        # -- stochastic fields; h5py order is (niter, nmu*nom, ng) for flux
+        #    and (niter, ncell) for grid fields
+        ng = int(f['flux'].attrs['ng'])
+        out['flx_luminos'] = f['flux/luminos'][()].reshape(-1, ng).squeeze()
+        out['flx_lumnum'] = f['flux/lumnum'][()].reshape(-1, ng).squeeze()
+        for name in ('temp', 'radtemp', 'eraddens'):
+            out[f'grd_{name}'] = f[f'grid/{name}'][()].squeeze()
+
+        # -- energy totals: [eout, evelo, sflux, sthermal] per iteration
+        out['tot_energy'] = np.atleast_1d(f['total/energy'][()].squeeze())
 
     # -- derived integrated quantities
     out['L_tot'] = np.atleast_1d(out['flx_luminos'].sum())

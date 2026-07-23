@@ -194,7 +194,7 @@ program superlite
      call sourcetally
 !-- write output for source particle distribution
      call reduce_srctally
-     if(lmpi0) call output_source
+     if(lmpi0.and.in_io_ascii) call output_source
 !
 !
 !-- advance particles
@@ -221,7 +221,7 @@ program superlite
 !-- output
      if(lmpi0) write(6,*) "--> Tally flux packets"
      call reduce_fluxtally !MPI  !collect flux results from all workers
-     if(lmpi0) call output_flux
+     if(lmpi0.and.in_io_ascii) call output_flux
 !
      if(lmpi0) write(6,*) "--> Print output files"
 
@@ -232,10 +232,15 @@ program superlite
      if(lmpi0) then
 
 !-- write output
-        call output_grid
-        call output_grp
+        if(in_io_ascii) then
+           call output_grid
+           call output_grp
+           if(it==in_niter.and.in_io_profdump) call output_profile
+        endif
+!-- write hdf5 output (primary format)
+        call output_h5(it)
+        if(it==in_niter.and.in_io_profdump) call output_h5_profile
         if(it>1.and.in_io_opacdump=='one') in_io_opacdump = 'off'
-        if(it==in_niter.and.in_io_profdump) call output_profile
 
 !-- write stdout
         write(6,*)
@@ -279,6 +284,8 @@ program superlite
      write(6,*) 'SuperLite finished'
      if(in_io_grabstdout) write(0,'(a,f8.2,"s")')'SuperLite finished',t_all!repeat to stderr
   endif
+!-- close hdf5 output
+  if(lmpi0) call output_h5_close
 !-- Clean up memory. (This helps to locate memory leaks)
   call dealloc_all
   call mpi_finalize(ierr) !MPI

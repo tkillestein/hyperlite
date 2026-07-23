@@ -1,63 +1,134 @@
 {
   "version": 6,
-  "cmakeMinimumRequired": { "major": 3, "minor": 23 },
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23
+  },
   "configurePresets": [
     {
       "name": "base",
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     },
     {
       "name": "gfortran-base",
       "hidden": true,
       "inherits": "base",
-      "environment": { "FC": "gfortran" }
+      "environment": {
+        "FC": "gfortran"
+      }
     },
     {
       "name": "gfortran-serial",
       "inherits": "gfortran-base",
       "displayName": "gfortran Release, no threading",
-      "cacheVariables": { "HYPERLITE_OPENMP": "OFF", "HYPERLITE_MPI": "OFF" }
+      "cacheVariables": {
+        "HYPERLITE_OPENMP": "OFF",
+        "HYPERLITE_MPI": "OFF"
+      }
     },
     {
       "name": "gfortran-openmp",
       "inherits": "gfortran-base",
       "displayName": "gfortran Release + OpenMP",
-      "cacheVariables": { "HYPERLITE_OPENMP": "ON", "HYPERLITE_MPI": "OFF" }
+      "cacheVariables": {
+        "HYPERLITE_OPENMP": "ON",
+        "HYPERLITE_MPI": "OFF"
+      }
     },
     {
       "name": "gfortran-mpi",
       "inherits": "gfortran-base",
       "displayName": "gfortran Release + MPI + OpenMP",
-      "cacheVariables": { "HYPERLITE_OPENMP": "ON", "HYPERLITE_MPI": "ON" }
+      "cacheVariables": {
+        "HYPERLITE_OPENMP": "ON",
+        "HYPERLITE_MPI": "ON"
+      }
     },
     {
       "name": "gfortran-debug",
       "inherits": "gfortran-base",
       "displayName": "gfortran Debug (-fcheck=all)",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "HYPERLITE_OPENMP": "OFF", "HYPERLITE_MPI": "OFF" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "HYPERLITE_OPENMP": "OFF",
+        "HYPERLITE_MPI": "OFF"
+      }
     },
     {
       "name": "ifx-release",
       "inherits": "base",
       "displayName": "Intel ifx Release + OpenMP",
-      "environment": { "FC": "ifx" },
-      "cacheVariables": { "HYPERLITE_OPENMP": "ON", "HYPERLITE_MPI": "OFF" }
+      "environment": {
+        "FC": "ifx"
+      },
+      "cacheVariables": {
+        "HYPERLITE_OPENMP": "ON",
+        "HYPERLITE_MPI": "OFF",
+        "HYPERLITE_HDF5": "OFF"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "gfortran-serial", "configurePreset": "gfortran-serial" },
-    { "name": "gfortran-openmp", "configurePreset": "gfortran-openmp" },
-    { "name": "gfortran-mpi", "configurePreset": "gfortran-mpi" },
-    { "name": "gfortran-debug", "configurePreset": "gfortran-debug" },
-    { "name": "ifx-release", "configurePreset": "ifx-release" }
+    {
+      "name": "gfortran-serial",
+      "configurePreset": "gfortran-serial"
+    },
+    {
+      "name": "gfortran-openmp",
+      "configurePreset": "gfortran-openmp"
+    },
+    {
+      "name": "gfortran-mpi",
+      "configurePreset": "gfortran-mpi"
+    },
+    {
+      "name": "gfortran-debug",
+      "configurePreset": "gfortran-debug"
+    },
+    {
+      "name": "ifx-release",
+      "configurePreset": "ifx-release"
+    }
   ],
   "testPresets": [
-    { "name": "gfortran-serial", "configurePreset": "gfortran-serial", "output": { "outputOnFailure": true } },
-    { "name": "gfortran-openmp", "configurePreset": "gfortran-openmp", "output": { "outputOnFailure": true } },
-    { "name": "gfortran-mpi", "configurePreset": "gfortran-mpi", "output": { "outputOnFailure": true } },
-    { "name": "gfortran-debug", "configurePreset": "gfortran-debug", "output": { "outputOnFailure": true } },
-    { "name": "ifx-release", "configurePreset": "ifx-release", "output": { "outputOnFailure": true } }
+    {
+      "name": "gfortran-serial",
+      "configurePreset": "gfortran-serial",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gfortran-openmp",
+      "configurePreset": "gfortran-openmp",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gfortran-mpi",
+      "configurePreset": "gfortran-mpi",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gfortran-debug",
+      "configurePreset": "gfortran-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ifx-release",
+      "configurePreset": "ifx-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
   ]
 }

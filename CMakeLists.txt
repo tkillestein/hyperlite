@@ -10,6 +10,7 @@ project(hyperlite
 #-- options
 option(HYPERLITE_MPI "Build with MPI (cell-decomposed gas solve, replicated transport)" OFF)
 option(HYPERLITE_OPENMP "Build with OpenMP threading" ON)
+option(HYPERLITE_HDF5 "Build with HDF5 (output.h5; OFF compiles a no-op stub)" ON)
 
 #-- default to a Release build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -32,6 +33,12 @@ endif()
 
 #-- dependencies
 find_package(LAPACK REQUIRED)  # dgetrf/dgetri in src/gas/physical_opacity_nlte.f
+if(HYPERLITE_HDF5)
+  find_package(HDF5 REQUIRED COMPONENTS Fortran)  # output.h5 (+ atomic data, Phase 3)
+  set(HYPERLITE_HDF5_IO_SRC src/io/hdf5_io.f90)
+else()
+  set(HYPERLITE_HDF5_IO_SRC src/io/hdf5_io_stub.f90)
+endif()
 
 if(HYPERLITE_OPENMP)
   find_package(OpenMP REQUIRED COMPONENTS Fortran)
@@ -46,6 +53,9 @@ endif()
 
 #-- helper: propagate OpenMP/MPI usage to a target
 function(hyperlite_target_deps tgt)
+  if(HYPERLITE_HDF5)
+    target_link_libraries(${tgt} PUBLIC HDF5::HDF5)
+  endif()
   if(HYPERLITE_OPENMP)
     target_link_libraries(${tgt} PUBLIC OpenMP::OpenMP_Fortran)
   endif()
@@ -80,6 +90,7 @@ add_library(hyperlite_modules OBJECT
   src/output/totalsmod.f
   src/transport/transportmod.f
   src/source/sourcemod.f
+  ${HYPERLITE_HDF5_IO_SRC}
 )
 hyperlite_target_deps(hyperlite_modules)
 
@@ -144,6 +155,7 @@ hyperlite_component(hyperlite_output
   src/output/output_grp.f
   src/output/output_profile.f
   src/output/output_source.f
+  src/output/output_h5.f90
 )
 
 ########################################################################
@@ -196,6 +208,21 @@ if(Python3_FOUND)
   set_tests_properties(regression-smoke PROPERTIES
     FIXTURES_REQUIRED smoke)
 
+  #-- statistical regression reading output.h5 directly + h5<->ascii roundtrip
+  if(HYPERLITE_HDF5)
+    add_test(NAME regression-smoke-h5
+      COMMAND Python3::Interpreter ${PROJECT_SOURCE_DIR}/tests/regression/compare.py
+              ${SMOKE_RUNDIR} --source h5 -v)
+    set_tests_properties(regression-smoke-h5 PROPERTIES
+      FIXTURES_REQUIRED smoke)
+
+    add_test(NAME regression-roundtrip
+      COMMAND Python3::Interpreter ${PROJECT_SOURCE_DIR}/tests/regression/roundtrip.py
+              ${SMOKE_RUNDIR})
+    set_tests_properties(regression-roundtrip PROPERTIES
+      FIXTURES_REQUIRED smoke)
+  endif()
+
   #-- harness self-test: a perturbed run MUST fail the comparison
   add_test(NAME regression-selftest
     COMMAND Python3::Interpreter ${PROJECT_SOURCE_DIR}/tests/regression/compare.py
@@ -218,4 +245,4 @@ else()
 endif()
 
 message(STATUS "hyperlite ${PROJECT_VERSION} configured "
-  "(MPI=${HYPERLITE_MPI} OpenMP=${HYPERLITE_OPENMP} ${CMAKE_BUILD_TYPE})")
+  "(MPI=${HYPERLITE_MPI} OpenMP=${HYPERLITE_OPENMP} HDF5=${HYPERLITE_HDF5} ${CMAKE_BUILD_TYPE})")

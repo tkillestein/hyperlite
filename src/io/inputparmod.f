@@ -102,6 +102,7 @@ c-- output
       character(4) :: in_io_pdensdump = 'off '   !off|on: write partial densities to file
       logical :: in_io_profdump = .false.  !write profile to file at the end
       logical :: in_io_debugging = .false. !sets nogriddump to false, opacdump,pdensdump,dogrdtally,profdump to true
+      logical :: in_io_ascii = .true.  !write legacy ASCII output files alongside output.h5
 c
 c-- runtime parameter namelist
       namelist /inputpars/
@@ -139,7 +140,8 @@ c-- runtime parameter namelist
      & in_io_grabstdout,
      & in_io_nogriddump,in_io_dogrdtally,
      & in_io_opacdump,in_io_pdensdump,
-     & in_io_profdump,in_io_debugging
+     & in_io_profdump,in_io_debugging,
+     & in_io_ascii
 c
 c-- pointers
 c
@@ -243,6 +245,7 @@ c
       call insertl(in_nothmson,in_l,il)
       call insertl(in_io_profdump,in_l,il)
       call insertl(in_io_debugging,in_l,il)
+      call insertl(in_io_ascii,in_l,il)
 c
       contains
 c

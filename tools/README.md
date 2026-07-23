@@ -35,6 +35,7 @@ Both run in CI on every push.
 | `sgfilter` | Smooth `output.flx_luminos` flux data with a Savitzky-Golay filter |
 | `wlgenadd` | Generate an `input.wlgrid` (or `input.fluxwl`) custom wavelength grid |
 | `parse-hdf5-sndata` | Coarsen HDF5 (FLASH-style block AMR) supernova data and convert to ASCII |
+| `h5-to-ascii` | Export a hyperlite `output.h5` back to the legacy `output.*` ASCII tables |
 
 Each accepts `--help`. `hyperlite_tools.myfuncts` provides shared helper
 functions (Stella profile loading, safe logs, file editing).

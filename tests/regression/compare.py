@@ -36,19 +36,25 @@ sys.path.insert(0, str(Path(__file__).parent))
 import sloutput  # noqa: E402
 
 ANCHOR_RTOL = 1e-6      # ASCII outputs carry ~5 significant digits
+# -- the committed reference stores anchors parsed from ASCII (5 digits); a
+#    full-precision output.h5 run legitimately deviates by up to half an ulp
+#    of that formatting.  Until the reference is regenerated from HDF5
+#    (Phase 5 re-baseline), h5-source runs use the formatting-limited rtol.
+ANCHOR_RTOL_H5 = 1.2e-4
 INTEGRATED_RTOL = 5e-3  # tight relative tolerance on conserved/integrated
 CONSERVATION_RTOL = 1e-3
 
 
-def check_anchors(run: dict, ref: h5py.File, errors: list[str]) -> None:
+def check_anchors(run: dict, ref: h5py.File, rtol: float,
+                  errors: list[str]) -> None:
     for field in sloutput.ANCHOR_FIELDS:
         want = ref['anchors'][field][()]
         got = run[field]
         if got.shape != want.shape:
             errors.append(f'anchor {field}: shape {got.shape} != {want.shape}')
-        elif not np.allclose(got, want, rtol=ANCHOR_RTOL, atol=0.0):
+        elif not np.allclose(got, want, rtol=rtol, atol=0.0):
             worst = np.max(np.abs(got - want) / np.maximum(np.abs(want), 1e-300))
-            errors.append(f'anchor {field}: max rel dev {worst:.2e} > {ANCHOR_RTOL}')
+            errors.append(f'anchor {field}: max rel dev {worst:.2e} > {rtol}')
 
 
 def check_stochastic(run: dict, ref: h5py.File, k: float, outlier_frac: float,
@@ -111,11 +117,13 @@ def main() -> int:
     ap.add_argument('--perturb', type=float, default=0.0, metavar='FRAC',
                     help='self-test: scale stochastic fields by (1+FRAC); '
                          'the comparison is then EXPECTED to fail')
+    ap.add_argument('--source', choices=('ascii', 'h5'), default='ascii',
+                    help='read legacy output.* tables or output.h5')
     ap.add_argument('-v', '--verbose', action='store_true')
     args = ap.parse_args()
 
     try:
-        run = sloutput.read_run(args.rundir)
+        run = sloutput.read_run(args.rundir, source=args.source)
     except (OSError, ValueError) as e:
         print(f'ERROR: cannot parse run outputs: {e}', file=sys.stderr)
         return 2
@@ -132,7 +140,8 @@ def main() -> int:
         if args.verbose:
             meta = dict(ref['meta'].attrs)
             print(f'reference: {args.reference} {meta}')
-        check_anchors(run, ref, errors)
+        anchor_rtol = ANCHOR_RTOL if args.source == 'ascii' else ANCHOR_RTOL_H5
+        check_anchors(run, ref, anchor_rtol, errors)
         check_stochastic(run, ref, args.k, args.outlier_frac, errors,
                          args.verbose)
         check_integrated(run, ref, args.k, errors, args.verbose)

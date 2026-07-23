@@ -22,7 +22,7 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y gfortran liblapack-dev libblas-dev
+          sudo apt-get install -y gfortran liblapack-dev libblas-dev libhdf5-dev
           if [ "${{ matrix.preset }}" = "gfortran-mpi" ]; then
             sudo apt-get install -y libopenmpi-dev openmpi-bin
           fi
