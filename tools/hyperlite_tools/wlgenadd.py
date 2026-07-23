@@ -10,20 +10,18 @@ Create a input.wlgrid file for a custom grid: a log-spaced base grid with a
 higher-resolution log-spaced insert. Same can be used to create an
 input.fluxwl file (via --fname-out).
 """
-import argparse
 import numpy as np
+import rich_click as click
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description='Create an input.wlgrid file for a custom wavelength'
-        ' grid: log-spaced base grid with a higher-resolution insert.')
-    parser.add_argument('--fname-out', type=str, default='input.wlgrid',
-                        help='Output file name (default: input.wlgrid)')
-    parser.add_argument('--show-plots', action='store_true',
-                        help='Display a plot of the grid spacing')
-    args = parser.parse_args()
-
+@click.command()
+@click.option('--fname-out', type=str, default='input.wlgrid',
+              show_default=True, help='Output file name')
+@click.option('--show-plots', is_flag=True,
+              help='Display a plot of the grid spacing')
+def main(fname_out, show_plots):
+    """Create an input.wlgrid file for a custom wavelength grid:
+    log-spaced base grid with a higher-resolution insert."""
     # construct grid
     ## set min, max values and number of bins
     ng = 50
@@ -41,7 +39,7 @@ def main():
 
     wlgrid_new = np.concatenate((wlgrid1, wlgrid_res, wlgrid2))
 
-    if args.show_plots:
+    if show_plots:
         from matplotlib import pyplot as plt
         fig99 = plt.figure(num=99)
         fig99.clear()
@@ -52,7 +50,7 @@ def main():
         plt.show()
 
     # write grid values
-    with open(args.fname_out, 'w') as f:
+    with open(fname_out, 'w') as f:
         print("File name: ", f.name)
         f.write(str(len(wlgrid_new)) + " ")
         for wlval in wlgrid_new:

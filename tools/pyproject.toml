@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hyperlite-tools"
-version = "1.99.0"
+version = "2.0.0rc1"
 description = "Python tools for the hyperlite (SuperLite) IMC-DDMC radiation-transport code: input-deck converters, flux post-processing, wavelength-grid generation"
 readme = "README.md"
 license = { text = "GPL-3.0-only" }
@@ -15,6 +15,7 @@ dependencies = [
   "scipy",
   "matplotlib",
   "h5py",
+  "rich-click",
 ]
 
 [project.urls]
@@ -26,8 +27,8 @@ wlgenadd = "hyperlite_tools.wlgenadd:main"
 h5-to-ascii = "hyperlite_tools.h5_to_ascii:main"
 build-atomic-h5 = "hyperlite_tools.build_atomic_h5:main"
 hyperlite-bench = "hyperlite_tools.bench:main"
-stella2superlite = "hyperlite_tools._run:stella2superlite"
-parse-hdf5-sndata = "hyperlite_tools._run:parse_hdf5_sndata"
+stella2superlite = "hyperlite_tools.stella2superlite:main"
+parse-hdf5-sndata = "hyperlite_tools.parse_hdf5_sndata:main"
 
 [dependency-groups]
 dev = [
@@ -49,11 +50,6 @@ ignore = [
   "E741",   # ambiguous variable names: legacy scientific code uses l, I freely
   "UP031",  # %-formatting is used consistently in the legacy scripts
 ]
-
-[tool.ruff.lint.per-file-ignores]
-# legacy top-to-bottom scripts, ported as-is; cleaned up in a later phase
-"hyperlite_tools/stella2superlite.py" = ["E701", "E702", "B007", "F841"]
-"hyperlite_tools/parse_hdf5_sndata.py" = ["E701", "E702", "B007", "F841"]
 
 [tool.ty.environment]
 python-version = "3.9"

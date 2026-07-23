@@ -8,11 +8,11 @@ the HDF5 data at full double precision; the text formatting matches the
 legacy files except that 3-digit exponents keep their 'E' (the Fortran
 writers drop it, e.g. 1.2345-100).
 """
-import argparse
 from pathlib import Path
 
 import h5py
 import numpy as np
+import rich_click as click
 
 
 def _wrow(f, arr, fmt='%12.4E'):
@@ -163,14 +163,17 @@ def _export_profile(h, outdir):
             _wrow(f, row)
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('h5file', type=Path, help='hyperlite output.h5 file')
-    ap.add_argument('-o', '--outdir', type=Path, default=Path('.'),
-                    help='directory for the output.* files (default: cwd)')
-    args = ap.parse_args()
-    export(args.h5file, args.outdir)
-    print(f'exported {args.h5file} -> {args.outdir}/output.*')
+@click.command()
+@click.argument('h5file', type=click.Path(exists=True, dir_okay=False,
+                                          path_type=Path))
+@click.option('-o', '--outdir', type=click.Path(file_okay=False,
+                                                path_type=Path),
+              default=Path('.'), show_default=True,
+              help='directory for the output.* files')
+def main(h5file, outdir):
+    """Export a hyperlite output.h5 back to the legacy ASCII output.* tables."""
+    export(h5file, outdir)
+    print(f'exported {h5file} -> {outdir}/output.*')
 
 
 if __name__ == '__main__':

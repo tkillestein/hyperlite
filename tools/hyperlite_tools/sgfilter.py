@@ -10,37 +10,32 @@
 
 #-- libraries
 import numpy as np
-import argparse
+import rich_click as click
 
 
-def main():
-    #-- build parse field
-    parser = argparse.ArgumentParser(description='Post-process flux data'
-                                     ' with a Savitzky-Golay filter.')
-    parser.add_argument('flux', type=str, help='File of flux data')
-    parser.add_argument('flux_grid', type=str, help='File of flux grid data')
-    parser.add_argument('--nfilter', type=int, default=5,
-                        help='Number of filter points')
-    parser.add_argument('--fname_out', type=str, help='Optional name for'
-                        ' output file.')
-
-    #-- parse the arguments
-    args = parser.parse_args()
-
+@click.command()
+@click.argument('flux', type=click.Path(exists=True, dir_okay=False))
+@click.argument('flux_grid', type=click.Path(exists=True, dir_okay=False))
+@click.option('--nfilter', type=int, default=5, show_default=True,
+              help='Number of filter points')
+@click.option('--fname-out', '--fname_out', 'fname_out', type=str,
+              default=None, help='Optional name for output file.')
+def main(flux, flux_grid, nfilter, fname_out):
+    """Post-process flux data (FLUX, on the grid in FLUX_GRID) with a
+    Savitzky-Golay filter."""
     #-- load the flux data (atleast_2d: a snapshot run writes a single row)
-    flux = np.atleast_2d(np.loadtxt(args.flux))
+    flux = np.atleast_2d(np.loadtxt(flux))
 
     #-- number of time steps
     nt = np.size(flux, 0)
 
     #-- get wavelength grid from flux grid
-    with open(args.flux_grid) as wlfile:
+    with open(flux_grid) as wlfile:
         wlfile.readline()
         wlline = wlfile.readline().split()
     wl = np.array([float(wlval) for wlval in wlline])
 
     #-- ensure a sufficient number of groups
-    nfilter = args.nfilter
     ng = np.size(wl) - 1
     if ng < nfilter:
         print('WARNING: insufficient number of groups (< nfilter)')
@@ -82,11 +77,11 @@ def main():
         smooth_flux[it, :] *= np.sum(flux[it, :])/np.sum(smooth_flux[it, :])
 
     #-- save the smoothed flux
-    if args.fname_out is None:
+    if fname_out is None:
         np.savetxt('output.flx_luminos_smoothed', smooth_flux,
                    fmt='% .4e', delimiter=' ')
     else:
-        np.savetxt(args.fname_out, smooth_flux, fmt='% .4e', delimiter=' ')
+        np.savetxt(fname_out, smooth_flux, fmt='% .4e', delimiter=' ')
 
 
 if __name__ == '__main__':

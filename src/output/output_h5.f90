@@ -10,6 +10,7 @@ subroutine output_h5
 ! (output_grid/output_grp/output_flux/output_source + tot_energy).
 !***********************************************************************
   use hdf5_io
+  use versionmod
   use mpimod, only: nmpi
   use inputparmod
   use timingmod
@@ -31,6 +32,8 @@ subroutine output_h5
 !-- meta
     call h5io_mkgroup('/meta')
     call h5io_attr_str('/meta', 'code', 'hyperlite')
+    call h5io_attr_str('/meta', 'version', ver_release)
+    call h5io_attr_str('/meta', 'git_revision', ver_git)
     call h5io_attr_i('/meta', 'schema_version', 1)
     call h5io_attr_i('/meta', 'nmpi', nmpi)
     call h5io_attr_i('/meta', 'nomp', in_nomp)

@@ -3,6 +3,8 @@
       subroutine banner
 c     -----------------
       use mpimod
+      use versionmod
+      use iso_fortran_env, only:compiler_version
       implicit none
 ************************************************************************
 * Print banner, start date/time, and code revision.
@@ -12,9 +14,6 @@ c     -----------------
 c
       character(MPI_MAX_PROCESSOR_NAME) :: pname
       integer :: ilen,ierr
-c
-      character(40) :: coderev_id='r1.0.1'
-c      include 'version.inc'
 c
       call date_and_time(t_startdate,t_starttime)
       call mpi_get_processor_name(pname,ilen,ierr)
@@ -41,11 +40,9 @@ c
       write(6,*) "by Ryan T. Wollaeger and Daniel R. van Rossum"
 
 c
-      write(6,*) "code revision id: ", trim(coderev_id)
-c
-c     write(6,*) "build hostname  : ", trim(build_hostname)
-c     write(6,*) "compiler        : ", trim(compiler_version)
-c     write(6,*) "compiler flags  : ", trim(compiler_flags)
+      write(6,*) "version         : ", ver_release
+      write(6,*) "git revision    : ", ver_git
+      write(6,*) "compiler        : ", trim(compiler_version())
 c
       write(6,*) 'simulation date : ', t_startdate//" / "//t_starttime
       write(6,*) 'processor name  : ', trim(pname)

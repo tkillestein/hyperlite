@@ -1,0 +1,2 @@
+# docs build (mkdocs build --strict, run from the repository root)
+mkdocs-material>=9.5,<10

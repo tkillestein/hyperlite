@@ -1,0 +1,15 @@
+!This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
+!Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
+!-- generated from src/core/versionmod.f90.in by cmake/GenerateVersion.cmake
+!-- DO NOT EDIT the generated file
+module versionmod
+  implicit none
+!***********************************************************************
+! Build-time version stamp (OVERHAUL Phase 7): the release version comes
+! from the CMake project() call (+rc suffix), the revision from
+! git describe --tags --always --dirty at build time.
+!***********************************************************************
+  character(*),parameter :: ver_release = '@HYPERLITE_VER@'
+  character(*),parameter :: ver_git = '@HYPERLITE_GIT@'
+end module versionmod
+! vim: fdm=marker

@@ -3,9 +3,11 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(hyperlite
-  VERSION 1.99.0
+  VERSION 2.0.0
   DESCRIPTION "SuperLite/hyperlite IMC-DDMC radiation transport for interacting transients"
   LANGUAGES Fortran)
+set(HYPERLITE_VERSION_SUFFIX "-rc")  # cleared on the final 2.0.0 release
+set(HYPERLITE_VERSION_FULL "${PROJECT_VERSION}${HYPERLITE_VERSION_SUFFIX}")
 
 #-- options
 option(HYPERLITE_MPI "Build with MPI (cell-decomposed gas solve, replicated transport)" OFF)
@@ -70,9 +72,31 @@ function(hyperlite_target_deps tgt)
 endfunction()
 
 ########################################################################
+# version stamp (regenerated at build time so git describe tracks HEAD)
+########################################################################
+set(HYPERLITE_VERSIONMOD ${PROJECT_BINARY_DIR}/versionmod.f90)
+add_custom_target(hyperlite_version_gen
+  COMMAND ${CMAKE_COMMAND}
+    -DSRC=${PROJECT_SOURCE_DIR}/src/core/versionmod.f90.in
+    -DDST=${HYPERLITE_VERSIONMOD}
+    -DHYPERLITE_VER=${HYPERLITE_VERSION_FULL}
+    -DSOURCE_DIR=${PROJECT_SOURCE_DIR}
+    -P ${PROJECT_SOURCE_DIR}/cmake/GenerateVersion.cmake
+  BYPRODUCTS ${HYPERLITE_VERSIONMOD}
+  COMMENT "Stamping versionmod.f90")
+#-- generate once at configure time so the source exists for the build graph
+execute_process(COMMAND ${CMAKE_COMMAND}
+  -DSRC=${PROJECT_SOURCE_DIR}/src/core/versionmod.f90.in
+  -DDST=${HYPERLITE_VERSIONMOD}
+  -DHYPERLITE_VER=${HYPERLITE_VERSION_FULL}
+  -DSOURCE_DIR=${PROJECT_SOURCE_DIR}
+  -P ${PROJECT_SOURCE_DIR}/cmake/GenerateVersion.cmake)
+
+########################################################################
 # module library (all .mod-producing sources; consumed by every component)
 ########################################################################
 add_library(hyperlite_modules OBJECT
+  ${HYPERLITE_VERSIONMOD}
   src/core/kindmod.f90
   src/core/elemdatamod.f
   src/core/physconstmod.f
@@ -98,6 +122,7 @@ add_library(hyperlite_modules OBJECT
   src/source/sourcemod.f
   ${HYPERLITE_HDF5_IO_SRC}
 )
+add_dependencies(hyperlite_modules hyperlite_version_gen)
 hyperlite_target_deps(hyperlite_modules)
 
 ########################################################################
@@ -197,6 +222,15 @@ install(TARGETS superlite RUNTIME DESTINATION bin)
 ########################################################################
 enable_testing()
 find_package(Python3 COMPONENTS Interpreter)
+
+#-- unit tests (Phase 7): plain-Fortran self-checking programs
+foreach(t philox binsrch specint)
+  add_executable(test_${t} tests/unit/test_${t}.f90)
+  target_link_libraries(test_${t} PRIVATE
+    hyperlite_modules hyperlite_misc hyperlite_transport hyperlite_grid)
+  hyperlite_target_deps(test_${t})
+  add_test(NAME unit-${t} COMMAND test_${t})
+endforeach()
 
 if(Python3_FOUND AND HYPERLITE_HDF5)
   #-- bundled atomic data, generated from the raw ASCII (needs python3 h5py)

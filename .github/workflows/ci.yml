@@ -110,6 +110,22 @@ jobs:
           /tmp/pipenv/bin/pip install -q -e tools/
           /tmp/pipenv/bin/sgfilter --help
 
+  docs:
+    name: docs (mkdocs build --strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install mkdocs
+        run: pip install -r docs/requirements.txt
+
+      - name: Build site
+        run: mkdocs build --strict
+
   ifx:
     name: ifx-release (non-blocking)
     runs-on: ubuntu-latest

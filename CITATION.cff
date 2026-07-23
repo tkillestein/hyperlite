@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the SuperLite method paper
+  (preferred-citation below) and the software itself.
+title: hyperlite
+abstract: >-
+  Modernized fork of SuperLite: a 1-D spherical multi-group Implicit
+  Monte Carlo / Discrete Diffusion Monte Carlo (IMC-DDMC)
+  radiation-transport code for spectral synthesis of interacting
+  supernovae, descended from SuperNu.
+type: software
+license: GPL-3.0-only
+version: 2.0.0-rc
+date-released: "2026-07-23"
+repository-code: "https://github.com/tkillestein/hyperlite"
+authors:
+  - family-names: Wagle
+    given-names: Gururaj A.
+  - family-names: Killestein
+    given-names: Thomas L.
+keywords:
+  - supernovae
+  - radiative transfer
+  - Monte Carlo
+  - spectral synthesis
+  - Fortran
+references:
+  - type: software
+    title: SuperLite
+    authors:
+      - family-names: Wagle
+        given-names: Gururaj A.
+    doi: 10.5281/zenodo.8102236
+preferred-citation:
+  type: article
+  title: >-
+    Monte Carlo Radiation Transport for Astrophysical Transients Powered
+    by Circumstellar Interaction
+  authors:
+    - family-names: Wagle
+      given-names: Gururaj A.
+    - family-names: Chatzopoulos
+      given-names: Emmanouil
+    - family-names: Wollaeger
+      given-names: Ryan T.
+    - family-names: Fontes
+      given-names: Christopher J.
+  journal: The Astrophysical Journal
+  volume: 953
+  issue: 2
+  start: 132
+  year: 2023
+  doi: 10.3847/1538-4357/acda23

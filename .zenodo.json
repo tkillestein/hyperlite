@@ -1,0 +1,29 @@
+{
+  "title": "hyperlite: modernized SuperLite IMC-DDMC radiation transport for interacting supernovae",
+  "description": "Modernized fork of SuperLite (Wagle et al. 2023, ApJ 953 132): a 1-D spherical multi-group Implicit Monte Carlo / Discrete Diffusion Monte Carlo (IMC-DDMC) radiation-transport code for spectral synthesis of interacting transients, descended from SuperNu. The fork adds a modern CMake/CTest build with CI, a statistical regression suite, HDF5 I/O, a counter-based Philox RNG with thread-count-independent results, SoA+OpenMP performance work (5.4x on the reference case), packaged Python tools, documentation, and physics correctness fixes.",
+  "license": "GPL-3.0-only",
+  "upload_type": "software",
+  "creators": [
+    {"name": "Wagle, Gururaj A."},
+    {"name": "Killestein, Thomas L."}
+  ],
+  "keywords": [
+    "supernovae",
+    "radiative transfer",
+    "Monte Carlo",
+    "spectral synthesis",
+    "Fortran"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "10.5281/zenodo.8102236",
+      "resource_type": "software"
+    },
+    {
+      "relation": "isDescribedBy",
+      "identifier": "10.3847/1538-4357/acda23",
+      "resource_type": "publication-article"
+    }
+  ]
+}
