@@ -54,6 +54,15 @@ Re-baseline history:
   the `diffusion11` stale-`specarr` fix, which zeroes two spurious
   far-UV edge bins and coherently shifts the 2100-2700 A region by
   6-35% (total luminosity conserved to 2e-5).
+- **Phase 6** (LTE partition-function fix): 20-seed ensemble. The Saha
+  EOS previously froze the atomic partition functions at the first
+  cell's temperature per process (the `all(q==0)` cache guard in
+  `ionsmod`), biasing ionization -- and hence opacities -- everywhere
+  else, and making results depend on the MPI rank count. Resetting the
+  cache per cell (`eos_update`) is a deliberate physics correction:
+  L_tot shifts +15% (2.72e42 -> 3.13e42 erg/s, max |z| 672 vs the
+  Phase-5 ensemble), and opacities become byte-identical across
+  `nmpi` in {1,2}.
 
 ## Checking a run
 

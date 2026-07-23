@@ -1,6 +1,6 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
-pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
+pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   eraddens,jrad,totevelo,ierr)
   use kindmod
 
@@ -17,7 +17,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
 !
   type(packet),target,intent(inout) :: ptcl
   type(packet2),target,intent(inout) :: ptcl2
-  type(grp_t_cache),target,intent(inout) :: cache
   type(rnd_t),intent(inout) :: rndstate
   real(dp),intent(inout) :: vx,vy,vz
   real(dp),intent(out) :: eraddens
@@ -47,12 +46,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   real(dp) :: opacleak(2)
   real(dp) :: probleak(2)
   real(dp) :: resopacleak, resdopleak
-  integer :: glump, gunlump
-  integer(i2),pointer :: glumps(:)
-  logical(lk2),pointer :: llumps(:)
-  real(dp),pointer :: capgreyinv
-  real(dp),pointer :: capemitgreyinv
-  real(dp),pointer :: speclump
+  integer :: glump
+  real(dp) :: capgreyinv
+  real(dp) :: capemitgreyinv
+  real(dp) :: speclump
   real(dp) :: dist, help
   real(dp) :: vhelp1,vhelp2,help1,help2
   real(dp) :: dummy
@@ -69,11 +66,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   e0 => ptcl%e0
   wl => ptcl%wl
 
-  capgreyinv => cache%capgreyinv
-  capemitgreyinv => cache%capemitgreyinv
-  speclump => cache%speclump
-  glumps => cache%glumps
-  llumps => cache%llumps
 !
   dummy = vy
   dummy = vz
@@ -88,70 +80,15 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   dist = dx(ix)
 
 !
-!-- update cache
-  if(ic/=cache%ic) then
-     cache%ic = ic
-     cache%istat = 0 !specarr is not cached yet
-     capgreyinv = max(1d0/grd_capgrey(ic),0d0) !catch nans
-     capemitgreyinv = max(1d0/grd_capemitgrey(ic),0d0)
-
-!
-!-- lump testing ---------------------------------------------
-     glump = 0
-     gunlump = grp_ng
-     glumps = 0
-!
-!-- find lumpable groups
-     speclump = grd_opaclump(7,ic)
-     if(speclump==0d0) then
-        glump=0
-     else
-        do iig=1,grp_ng
-           if(grd_cap(iig,ic)*dist >= trn_taulump .and. &
-                (grd_sig(ic) + grd_cap(iig,ic))*dist >= trn_tauddmc) then
-              llumps(iig) = .true.
-              glump=glump+1
-              glumps(glump) = int(iig,2)
-           else
-              llumps(iig) = .false.
-              glumps(gunlump) = int(iig,2)
-              gunlump=gunlump-1
-           endif
-        enddo
-     endif
-!
-!-- calculate lumped values
-     if(glump==grp_ng) then
-        emitlump = 1d0
-        caplump = grd_capgrey(ic)
-        capemitlump = grd_capemitgrey(ic)
-        doplump = 0d0
-     else
-!-- Planck x-section lump
-        caplump = grd_opaclump(8,ic)*speclump
-        capemitlump = grd_opaclump(9,ic)*speclump
-        if(in_nlte) then
-          emitlump = grd_opaclump(9,ic)*capemitgreyinv
-        else
-          emitlump = grd_opaclump(8,ic)*capgreyinv
-        endif
-        emitlump = min(emitlump,1d0)
-        doplump = grd_opaclump(11,ic)*speclump
-     endif
-!
-!-- save
-     cache%nlump = glump
-     cache%emitlump = emitlump
-     cache%caplump = caplump
-     cache%capemitlump = capemitlump
-     cache%doplump = doplump
-
-  endif !cache%ic /= ic
+!-- per-cell DDMC tables (precomputed once per sweep in ddmc_tables)
+  capgreyinv = grd_capgreyinv(ic)
+  capemitgreyinv = grd_capemitgreyinv(ic)
+  speclump = grd_opaclump(7,ic)
 
 !
 !-- in lump?
   if(grd_cap(ig,ic)*dist >= trn_taulump) then
-     glump = cache%nlump
+     glump = grd_nlump(ic)
   else
      glump = 0
   endif
@@ -162,29 +99,29 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
      return
   endif
 !
-!-- retrieve from cache
+!-- retrieve from the per-cell tables
   if(glump>0) then
-     emitlump = cache%emitlump
-     caplump = cache%caplump
-     capemitlump = cache%capemitlump
-     doplump = cache%doplump
+     emitlump = grd_emitlump(ic)
+     caplump = grd_caplump(ic)
+     capemitlump = grd_capemitlump(ic)
+     doplump = grd_doplump(ic)
   else
 !-- outside the lump
      if(in_nlte) then !NLTE
-       emitlump = specint0(grd_tempinv(ic),ig)* &
+       emitlump = grd_specarr(ig,ic)* &
                   capemitgreyinv*grd_capemit(ig,ic)
      else ! LTE
-       emitlump = specint0(grd_tempinv(ic),ig)* &
+       emitlump = grd_specarr(ig,ic)* &
                   capgreyinv*grd_cap(ig,ic)
      endif
      caplump = grd_cap(ig,ic)
      capemitlump = grd_capemit(ig,ic)
      if(ig/=grp_ng.and.grd_divv(ix).ge.0) then ! redshift
        doplump = dopspeccalc(grd_tempinv(ic),ig)*grd_divv(ix) &
-                   /(specint0(grd_tempinv(ic),ig)*3*pc_c)
+                   /(grd_specarr(ig,ic)*3*pc_c)
      elseif(ig/=1.and.grd_divv(ix).lt.0) then ! blueshift
        doplump = -1*dopspeccalc(grd_tempinv(ic),ig-1)*grd_divv(ix) &
-                   /(specint0(grd_tempinv(ic),ig)*3*pc_c)
+                   /(grd_specarr(ig,ic)*3*pc_c)
      else
        doplump = 0d0
      endif
@@ -268,14 +205,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
 !-- Doppler shift
   pdop = doplump*denom
 
-!-- update specarr cache only when necessary. this is slow
-  if(r1>=pa+pdop .and. r1<pa+pdop+sum(probleak) .and. speclump>0d0 .and. &
-        iand(cache%istat,2)==0) then
-     cache%istat = cache%istat + 2
-     call specintv(grd_tempinv(ic),grp_ng,cache%specarr,&
-        mask=llumps,maskval=.true.)
-  endif
-
 !-- doppler shift
   if (r1>=pa .and. r1<pa+pdop) then
 
@@ -288,7 +217,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
         help = 1d0/doplump
         if(grd_divv(ix).ge.0) then ! redshift
           do iig=1,glump
-             iiig = glumps(iig)
+             iiig = grd_glumps(iig,ic)
              if(iiig == grp_ng) cycle
              if(grd_cap(iiig+1,ic)*dist >= trn_taulump) cycle
              resdopleak = dopspeccalc(grd_tempinv(ic),iiig)&
@@ -298,7 +227,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
           enddo
          else ! blueshift
            do iig=glump,1,-1
-             iiig = glumps(iig)
+             iiig = grd_glumps(iig,ic)
              if(iiig == 1) cycle
              if(grd_cap(iiig-1,ic)*dist >= trn_taulump) cycle
              resdopleak = dopspeccalc(grd_tempinv(ic),iiig-1)&
@@ -371,8 +300,8 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
            denom2 = 0d0
            help = 1d0/opacleak(1)
            do iig=1,glump
-              iiig = glumps(iig)
-              specig = cache%specarr(iiig)
+              iiig = grd_glumps(iig,ic)
+              specig = grd_specarr(iiig,ic)
               !specig = specint0(grd_tempinv(ic),iiig)
 !-- calculating resolved leakage opacities
               if((grd_cap(iiig,l)+ &
@@ -443,8 +372,8 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
            denom2 = 0d0
            help = 1d0/opacleak(2)
            do iig=1,glump
-              iiig=glumps(iig)
-              specig = cache%specarr(iiig)
+              iiig = grd_glumps(iig,ic)
+              specig = grd_specarr(iiig,ic)
               !specig = specint0(grd_tempinv(ic),iiig)
 !-- calculating resolved leakage opacities
               mfphelp = (grd_cap(iiig,ic)+grd_sig(ic))*dx(ix)
@@ -485,8 +414,8 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
            denom2 = 0d0
            help = 1d0/opacleak(2)
            do iig=1,glump
-              iiig = glumps(iig)
-              specig = cache%specarr(iiig)
+              iiig = grd_glumps(iig,ic)
+              specig = grd_specarr(iiig,ic)
 !-- calculating resolved leakage opacities
               if((grd_cap(iiig,l)+ &
                    grd_sig(l))*dx(ix+1)<trn_tauddmc) then
@@ -556,23 +485,16 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
         iiig = emitgroup(r1,ic)
      else
 !
-!-- update specarr cache. this is slow
-        if(iand(cache%istat,1)==0) then
-           cache%istat = cache%istat + 1
-           call specintv(grd_tempinv(ic),grp_ng,cache%specarr, &
-              mask=llumps,maskval=.false.)
-        endif
-!
         call rnd_r(r1,rndstate)
         denom2 = 1d0/(1d0-emitlump)
         denom3 = 0d0
         do iig=grp_ng,glump+1,-1
-           iiig = glumps(iig)
+           iiig = grd_glumps(iig,ic)
            if(in_nlte) then !NLTE
-             help = cache%specarr(iiig)*grd_capemit(iiig,ic)&
+             help = grd_specarr(iiig,ic)*grd_capemit(iiig,ic)&
                     *capemitgreyinv
            else
-             help = cache%specarr(iiig)*grd_cap(iiig,ic)*capgreyinv
+             help = grd_specarr(iiig,ic)*grd_cap(iiig,ic)*capgreyinv
            endif
            denom3 = denom3 + help*denom2
            if(denom3>r1) exit

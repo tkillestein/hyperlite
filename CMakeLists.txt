@@ -150,6 +150,7 @@ hyperlite_component(hyperlite_source
 )
 
 hyperlite_component(hyperlite_transport
+  src/transport/ddmc_tables.f90
   src/transport/diffusion11.f90
   src/transport/transport11.f90
 )

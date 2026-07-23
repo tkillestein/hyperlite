@@ -38,7 +38,7 @@ c
 c-- diffusion
 c
       pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,
-     &  cache,rndstate,eraddens,jrad,totevelo,ierr)
+     &  rndstate,eraddens,jrad,totevelo,ierr)
       use kindmod
       use randommod
       use groupmod
@@ -46,7 +46,6 @@ c
       type(packet),target,intent(inout) :: ptcl
       type(packet2),target,intent(inout) :: ptcl2
       real(dp),intent(inout) :: vx,vy,vz
-      type(grp_t_cache),target,intent(inout) :: cache
       type(rnd_t),intent(inout) :: rndstate
       real(dp),intent(out) :: eraddens
       real(dp),intent(out) :: jrad
@@ -82,7 +81,7 @@ c
       end subroutine transport_
 c
       pure subroutine diffusion_(ptcl,ptcl2,vx,vy,vz,
-     &  cache,rndstate,eraddens,jrad,totevelo,ierr)
+     &  rndstate,eraddens,jrad,totevelo,ierr)
       use kindmod
       use randommod
       use groupmod
@@ -90,7 +89,6 @@ c
       type(packet),target,intent(inout) :: ptcl
       type(packet2),target,intent(inout) :: ptcl2
       real(dp),intent(inout) :: vx,vy,vz
-      type(grp_t_cache),target,intent(inout) :: cache
       type(rnd_t),intent(inout) :: rndstate
       real(dp),intent(out) :: eraddens
       real(dp),intent(out) :: jrad

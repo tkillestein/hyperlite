@@ -44,6 +44,18 @@ c-- Line emissivity for output
       real(sp),allocatable :: grd_emiss(:,:) !(ng,ncell)
 c-- leakage opacities
       real(dp),allocatable :: grd_opaclump(:,:) !(11,ncell) leak(6),speclump,caplump,capemitlump,igemitmax,doplump
+c-- DDMC per-cell transport tables, rebuilt once per transport sweep by
+c-- ddmc_tables (opacity/temperature are constant during the sweep)
+      real(dp),allocatable :: grd_specarr(:,:) !(ng,ncell) Planck spectral weights
+      integer,allocatable :: grd_nlump(:) !(ncell) number of lumped groups
+      integer(i2),allocatable :: grd_glumps(:,:) !(ng,ncell) group order: lumped first
+      logical(lk2),allocatable :: grd_llumps(:,:) !(ng,ncell) group is in the lump
+      real(dp),allocatable :: grd_emitlump(:) !(ncell)
+      real(dp),allocatable :: grd_caplump(:) !(ncell)
+      real(dp),allocatable :: grd_capemitlump(:) !(ncell)
+      real(dp),allocatable :: grd_doplump(:) !(ncell)
+      real(dp),allocatable :: grd_capgreyinv(:) !(ncell)
+      real(dp),allocatable :: grd_capemitgreyinv(:) !(ncell)
       real(dp),allocatable :: grd_tempinv(:) !(ncell)
 c-- scattering coefficient
       real(dp),allocatable :: grd_sig(:) !(ncell) !grey scattering opacity
@@ -177,6 +189,18 @@ c-- ndim=3 integer
 c
       allocate(grd_methodswap(grd_ncell))
 c
+c-- DDMC per-cell tables
+      allocate(grd_specarr(ng,grd_ncell))
+      allocate(grd_nlump(grd_ncell))
+      allocate(grd_glumps(ng,grd_ncell))
+      allocate(grd_llumps(ng,grd_ncell))
+      allocate(grd_emitlump(grd_ncell))
+      allocate(grd_caplump(grd_ncell))
+      allocate(grd_capemitlump(grd_ncell))
+      allocate(grd_doplump(grd_ncell))
+      allocate(grd_capgreyinv(grd_ncell))
+      allocate(grd_capemitgreyinv(grd_ncell))
+c
 c-- ndim=4 alloc
       allocate(grd_opaclump(11,grd_ncell))
       allocate(grd_emitprob(grd_nep,grd_ncell))
@@ -225,6 +249,9 @@ c-- ndim=3 integer
       deallocate(grd_methodswap)
 c-- ndim=4 alloc
       deallocate(grd_opaclump)
+      deallocate(grd_specarr,grd_nlump,grd_glumps,grd_llumps)
+      deallocate(grd_emitlump,grd_caplump,grd_capemitlump,grd_doplump)
+      deallocate(grd_capgreyinv,grd_capemitgreyinv)
       deallocate(grd_emitprob)
 c-- ndim=4 alloc
       deallocate(grd_cap)

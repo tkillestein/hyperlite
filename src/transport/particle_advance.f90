@@ -46,10 +46,6 @@ subroutine particle_advance
 !
   type(packet),target :: ptcl
   type(packet2),target :: ptcl2
-  type(grp_t_cache),target :: cache
-  real(dp),target :: specarr(grp_ng)
-  integer(i2),target :: glumps(grp_ng)
-  logical(lk2),target :: llumps(grp_ng)
 !
   type(rnd_t) :: rndstate
   integer,save :: iomp=0
@@ -83,6 +79,9 @@ subroutine particle_advance
 !-- new RNG epoch: transport draws are keyed by (epoch, particle slot)
   call rnd_advance_epoch
 
+!-- precompute the per-cell DDMC tables for this sweep
+  call ddmc_tables
+
 !$omp parallel default(none) &
 !$omp shared(rnd_states,prt_npartmax,prt_isvacant, &
 !$omp    prt_x,prt_mu,prt_om,prt_e,prt_e0,prt_wl,prt_y0,prt_z0, &
@@ -91,8 +90,7 @@ subroutine particle_advance
 !$omp    trn_tauddmc,trn_noampfact,trn_errorfatal, &
 !$omp    grd_vxarr,grd_methodswap,t_pckt_stat,transport,diffusion, &
 !$omp    in_puretran,in_io_dogrdtally,in_nomp) &
-!$omp private(ptcl,ptcl2,cache, &
-!$omp    specarr,glumps,llumps, &
+!$omp private(ptcl,ptcl2, &
 !$omp    x,y,z,mu,om,wl,e,e0,ix,iy,iz,ic,ig,icold,igold, &
 !$omp    vx,vy,vz,help1,help2,vhelp1,vhelp2, &
 !$omp    i,t0,t1,help,tau,labfact,jrad, &
@@ -131,13 +129,7 @@ subroutine particle_advance
   iz => ptcl2%iz
   ic => ptcl2%ic
   ig => ptcl2%ig
-!-- alloc
-  cache%specarr => specarr
-  cache%glumps => glumps
-  cache%llumps => llumps
-  cache%ic = 0
-
-!$omp do schedule(static,1) !round-robin
+!$omp do schedule(guided) !particle step counts vary wildly; RNG is schedule-invariant
   do ipart=1,prt_npartmax
      if(prt_isvacant(ipart)) cycle
 !
@@ -219,7 +211,7 @@ subroutine particle_advance
            if(.not.trn_noampfact) grd_eamp(icold) = grd_eamp(icold) + eamp
         else
            nstepddmc = nstepddmc + 1
-           call diffusion(ptcl,ptcl2,vx,vy,vz,cache,rndstate, &
+           call diffusion(ptcl,ptcl2,vx,vy,vz,rndstate, &
                 eraddens,jrad,tot_evelo,ierr)
            if(ptcl2%itype==1) then
               nmethodswap = nmethodswap + 1

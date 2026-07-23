@@ -17,7 +17,7 @@ c-- model id and comments
       character(40) :: in_name = "spn"  !simulation name/title, for post-processing identification
       character(80) :: in_comment = ""  !comment if any
 c-- parallelization
-      integer :: in_nomp = 1  !number of openmp threads
+      integer :: in_nomp = 0  !number of openmp threads (0 = use all available / OMP_NUM_THREADS)
 c-- random number generator
       integer :: in_rnd_seed = 0  !RNG key offset for statistically independent ensemble runs
 c

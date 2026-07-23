@@ -747,7 +747,9 @@ c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
 c
-      allocate(snd(10,grd_ndd))
+      allocate(snd(11,grd_ndd)) !11 = size(grd_opaclump,1); was 10: stale
+c-- after doplump was added, so the send buffer under-allocated and the
+c-- gather scrambled opaclump (incl. doplump) on nmpi>1 runs
       snd = grd_opaclump(:,grd_idd1:grd_idd1+grd_ndd-1)
       call mpi_allgatherv(snd,11*grd_ndd,MPI_REAL8,
      &  grd_opaclump,11*counts,11*displs,MPI_REAL8,

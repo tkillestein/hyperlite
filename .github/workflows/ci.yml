@@ -57,6 +57,16 @@ jobs:
           cd $GITHUB_WORKSPACE
           python tests/regression/compare.py $BUILD/smoke_run_omp2 -v
 
+      - name: Benchmark (reduced smoke case, OpenMP scaling)
+        if: matrix.preset == 'gfortran-openmp'
+        run: |
+          echo '### Benchmark (n2s=17)' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python3 tools/hyperlite_tools/bench.py \
+            --exe build/${{ matrix.preset }}/superlite --nomp 1,2 --n2s 17 \
+            | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Upload run outputs
         if: always()
         uses: actions/upload-artifact@v4

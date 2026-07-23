@@ -143,12 +143,19 @@ subroutine sourcenumbers_roundrobin_limit(iimpi,nvacant,evol,ntot,mvol,nvol)
   mvol = ntot
   n = mod(mvol,nmpi) !remainder
 !-- constant part
-  nvol = mvol/nmpi !on each rank
-!-- add to remainder whatever does not fit in vacancies
+  neach = mvol/nmpi !intended on each rank
+  nvol = 0
+!-- clamp every rank to its own vacancies; the excess joins the
+!-- remainder.  The ledger must evolve identically on all ranks (the
+!-- old code deducted the CURRENT rank's clamped nvol for every rank,
+!-- so each rank tracked different vacancy totals and they disagreed
+!-- about the remainder assignment: the source of the nmpi-dependent
+!-- eout/evelo bias, see OVERHAUL.md section 2)
   do l=0,nmpi-1
-     n = n + max(0,nvol-int(nvacant(l)))
-     if(l==impi) nvol = min(nvol,int(nvacant(l))) !current rank
-     nvacant(l) = max(0_i8,nvacant(l)-nvol)
+     nhere = min(neach,int(nvacant(l)))
+     n = n + (neach-nhere)
+     if(l==impi) nvol = nhere !current rank
+     nvacant(l) = nvacant(l) - nhere
   enddo
 !-- sanity check
   if(n>sum(nvacant)) stop 'srcnr_roundrobin_limit: not enough vacancies'

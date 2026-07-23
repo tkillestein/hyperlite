@@ -111,15 +111,20 @@ basis — it lets the speedup work proceed.
   — restore for license/provenance compliance.
 - `Input/` ships `input.par.lte`/`.nlte` but the code opens literal `input.par`;
   the `make run` staging never creates `input.par` → as-shipped `make run` fails.
-- **`nmpi`-dependent bias (found during Phase 0):** a 2-rank run of the smoke
-  case shifts the `eout`/`evelo` split by ~10–30σ relative to the 1-rank
-  ensemble (+1.5% escaped luminosity) while conserving `eout+evelo`. Suspect:
-  per-cell source-particle apportionment across ranks
-  (`SOURCE/sourcenumbers.f90`, `mvol/nmpi` rounding + `max(1,·)` floors)
-  changes per-cell sampling weights. Pre-existing (not introduced by Phase 0 —
-  serial path verified bit-identical). Regression is pinned to `nmpi=1`;
-  **must be root-caused and fixed before Gate 6**, which requires
-  `nmpi∈{1,2}` within MC noise.
+- **`nmpi`-dependent bias (found during Phase 0, root-caused and FIXED in
+  Phase 6):** a 2-rank run of the smoke case shifted the `eout`/`evelo`
+  split by ~10–30σ relative to the 1-rank ensemble (+1.5% escaped
+  luminosity) while conserving `eout+evelo`. The suspect apportionment in
+  `sourcenumbers.f90` was exonerated (its rank-dependent vacancy ledger
+  was a real bug — fixed — but source counts were already exact). Root
+  cause: the LTE Saha EOS *froze the atomic partition functions at the
+  first cell's temperature seen by each process* (the `all(q==0)` cache
+  guard in `ionsmod`), so ionization — and hence every opacity — depended
+  on which cells a rank solved first, i.e. on the domain decomposition.
+  Fix: reset the cached `q` per cell in `eos_update`. This is a genuine
+  physics correction (L_tot +15% on the smoke case); opacities are now
+  byte-identical across rank counts and `nmpi∈{1,2}` agree within MC
+  noise (0.3σ).
 
 **Environment note.** The dev container here has **no Fortran compiler, no MPI,
 no NumPy/h5py**. Building, reference-ensemble generation, and benchmarking must

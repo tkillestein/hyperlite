@@ -30,6 +30,14 @@ c-- loop over all gas_vals cells
      &     gas_radtemp(i),gas_rcell(i),ndens,gas_nelec(i))
        else
          !-- LTE EOS
+         !-- reset the partition-function cache so it is re-evaluated at
+         !-- THIS cell's temperature (ion_el%q is global state: the
+         !-- all(q==0) guard in ions_solve_eos otherwise froze q at the
+         !-- temperature of the first cell each process handled, making
+         !-- the ionization balance rank-decomposition-dependent)
+         do ll=1,gas_nelem
+          ion_el(ll)%i%q = 0d0
+         enddo !ll
          call ions_solve_eos(gas_natomfr(1,i),
      &     gas_temp(i),ndens,gas_nelec(i),niter)
        endif
