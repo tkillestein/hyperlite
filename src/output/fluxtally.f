@@ -17,7 +17,6 @@ c     ------------------------
       integer :: ig,imu,iom
       real(dp) :: help
       real(dp) :: t0
-      type(packet),pointer :: ptcl
 c
 c-- timer
       t0 = t_time()
@@ -33,20 +32,17 @@ c
 c-- check vacancy
       if(prt_isvacant(ipart)) cycle
 c
-c-- active particle
-      ptcl => prt_particles(ipart)
-c
 c-- check flux status
-       if(ptcl%x/=huge(help)) cycle
+       if(prt_x(ipart)/=huge(help)) cycle
 c
 c-- retrieving lab frame flux group, polar, azimuthal bin
-       ig = binsrch(ptcl%wl,flx_wl,flx_ng+1,.false.)
-       imu = binsrch(ptcl%mu,flx_mu,flx_nmu+1,.false.)
-       iom = binsrch(ptcl%om,flx_om,flx_nom+1,.false.)
+       ig = binsrch(prt_wl(ipart),flx_wl,flx_ng+1,.false.)
+       imu = binsrch(prt_mu(ipart),flx_mu,flx_nmu+1,.false.)
+       iom = binsrch(prt_om(ipart),flx_om,flx_nom+1,.false.)
 c
 c-- tallying outbound luminosity
-       flx_luminos(ig,imu,iom) = flx_luminos(ig,imu,iom)+ptcl%e
-       flx_lumdev(ig,imu,iom) = flx_lumdev(ig,imu,iom)+ptcl%e**2
+       flx_luminos(ig,imu,iom) = flx_luminos(ig,imu,iom)+prt_e(ipart)
+       flx_lumdev(ig,imu,iom) = flx_lumdev(ig,imu,iom)+prt_e(ipart)**2
        flx_lumnum(ig,imu,iom) = flx_lumnum(ig,imu,iom)+1
 
 c-- mark particle slot occupied or vacant

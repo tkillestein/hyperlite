@@ -26,7 +26,8 @@ c-- ionsmod
       call gas_dealloc
       call grid_dealloc
       call flux_dealloc
-      deallocate(prt_particles,prt_isvacant)
+      deallocate(prt_x,prt_mu,prt_om,prt_e,prt_e0,prt_wl)
+      deallocate(prt_isvacant)
       call mpimod_dealloc
       deallocate(grp_wl,grp_wlinv)
       deallocate(src_nvacantall)

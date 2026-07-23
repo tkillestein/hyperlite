@@ -35,7 +35,7 @@ subroutine interior_source!(it)
 !
   real(dp) :: emitprob(grp_ng)
   real(dp) :: tradinv
-  type(packet),pointer :: ptcl
+  type(packet) :: ptcl
 !-- shortcut
   pwr = in_srcepwr
 
@@ -83,7 +83,6 @@ subroutine interior_source!(it)
   do ii=1,nhere
      ipart = ipart + 1
      ivac = src_ivacant(ipart)
-     ptcl => prt_particles(ivac)
 
 !-- setting particle index to not vacant
      prt_isvacant(ivac) = .false.
@@ -156,6 +155,9 @@ subroutine interior_source!(it)
 !-- y,z position
         ptcl%y = grd_yarr(1)
         ptcl%z = grd_zarr(1)
+
+!-- store into SoA particle storage
+     call prt_scatter(ivac,ptcl)
 
   enddo !ipart
 !

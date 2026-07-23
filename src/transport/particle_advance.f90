@@ -81,7 +81,8 @@ subroutine particle_advance
   call counterreg(ct_nnonvacant,count(.not.prt_isvacant))
 
 !$omp parallel default(none) &
-!$omp shared(rnd_states,prt_npartmax,prt_isvacant,prt_particles, &
+!$omp shared(rnd_states,prt_npartmax,prt_isvacant, &
+!$omp    prt_x,prt_mu,prt_om,prt_e,prt_e0,prt_wl,prt_y0,prt_z0, &
 !$omp    grd_nx,grd_xarr,grd_ny,grd_yarr,grd_nz,grd_zarr,grd_icell, &
 !$omp    grp_ng,grp_wl,grd_igeom,grd_sig,grd_cap,grd_eamp, &
 !$omp    trn_tauddmc,trn_noampfact,trn_errorfatal, &
@@ -138,7 +139,7 @@ subroutine particle_advance
      if(prt_isvacant(ipart)) cycle
 !
 !-- active particle
-     ptcl = prt_particles(ipart) !copy properties out of array
+     call prt_gather(ipart,ptcl) !copy properties out of SoA storage
      ptcl2%ipart = ipart
      npckt = npckt+1
 
@@ -281,7 +282,7 @@ subroutine particle_advance
         ptcl%x = huge(help)  !-- mark particle as flux particle (stat is not saved in particle array)
 !
 !-- save particle properties
-        prt_particles(ipart) = ptcl
+        call prt_scatter(ipart,ptcl)
 !
     case default
        stop 'particle_advance: invalid particle status'

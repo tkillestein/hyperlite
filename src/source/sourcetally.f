@@ -13,7 +13,6 @@ c     ------------------------
 ************************************************************************
       integer :: ipart
       integer :: ix,iy,iz,ic,ig
-      type(packet),pointer :: ptcl
 c
 c-- init
       src_energy = 0.d0
@@ -25,21 +24,17 @@ c
 c-- check vacancy
       if(prt_isvacant(ipart)) cycle
 c
-c-- active particle
-      ptcl => prt_particles(ipart)
-c
-c
 c-- retrieving group and cell id
-       ig = binsrch(ptcl%wl,grp_wl,grp_ng+1,.false.)
-       ix = binsrch(ptcl%x,grd_xarr,grd_nx+1,.false.)
-       iy = binsrch(ptcl%y,grd_yarr,grd_ny+1,.false.)
-       iz = binsrch(ptcl%z,grd_zarr,grd_nz+1,.false.)
+       ig = binsrch(prt_wl(ipart),grp_wl,grp_ng+1,.false.)
+       ix = binsrch(prt_x(ipart),grd_xarr,grd_nx+1,.false.)
+       iy = binsrch(prt_y0,grd_yarr,grd_ny+1,.false.)
+       iz = binsrch(prt_z0,grd_zarr,grd_nz+1,.false.)
        ic = grd_icell(ix,iy,iz)
 c
 c-- tallying source packets
        if(ic<1.or.ic>grd_ncell) stop 'ic outside range'
        if(ig<1.or.ic>grp_ng) stop 'ig outside range'
-       src_energy(ic,ig) = src_energy(ic,ig)+ptcl%e
+       src_energy(ic,ig) = src_energy(ic,ig)+prt_e(ipart)
        src_number(ic,ig) = src_number(ic,ig)+1
 c
       enddo !ipart

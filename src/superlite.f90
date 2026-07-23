@@ -114,7 +114,7 @@ program superlite
 !-- allocate arrays of sizes retreived in bcast_permanent
   call ions_alloc_grndlev(gas_nelem,gas_ncell)  !ground state occupation numbers
   if(in_nlte) call nlte_alloc_nlev(nlte_nelem,gas_ncell) !NLTE
-  call particle_alloc(lmpi0)
+  call particle_alloc(lmpi0,grd_yarr(1),grd_zarr(1))
 
 !-- initialize random number generator, use different seeds for each rank
 !-- (in_rnd_seed offsets all ranks jointly for statistically independent ensemble runs)

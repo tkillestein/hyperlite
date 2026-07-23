@@ -99,7 +99,7 @@ subroutine boundary_source
 
 !-- save particle result
 !-----------------------
-     prt_particles(ivac) = ptcl
+     call prt_scatter(ivac,ptcl)
 
 
   enddo
