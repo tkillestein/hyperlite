@@ -76,7 +76,7 @@ add_library(hyperlite_modules OBJECT
   src/core/kindmod.f90
   src/core/elemdatamod.f
   src/core/physconstmod.f
-  src/core/randommod.f
+  src/core/randommod.f90
   ${PROJECT_BINARY_DIR}/mpimod.f
   src/core/miscmod.f
   src/gas/ionsmod.f

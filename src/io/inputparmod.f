@@ -19,7 +19,7 @@ c-- model id and comments
 c-- parallelization
       integer :: in_nomp = 1  !number of openmp threads
 c-- random number generator
-      integer :: in_rnd_seed = 0  !RNG stream offset for ensemble runs (0 reproduces legacy seeding)
+      integer :: in_rnd_seed = 0  !RNG key offset for statistically independent ensemble runs
 c
 c-- experimental iterative approach
       integer :: in_niter = 1 !number of iterations

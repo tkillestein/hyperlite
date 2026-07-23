@@ -116,11 +116,10 @@ program superlite
   if(in_nlte) call nlte_alloc_nlev(nlte_nelem,gas_ncell) !NLTE
   call particle_alloc(lmpi0,grd_yarr(1),grd_zarr(1))
 
-!-- initialize random number generator, use different seeds for each rank
-!-- (in_rnd_seed offsets all ranks jointly for statistically independent ensemble runs)
+!-- initialize random number generator (Philox, counter-based): every
+!-- rank/ensemble member gets an independent key family; the service
+!-- stream (source sampling) and per-thread streams are set up inside
   call rnd_init(in_nomp,impi+nmpi*in_rnd_seed)
-!-- use extra stream for non-threaded code
-  rnd_state = rnd_states(1)
 
 !-- volume
   if(str_lvol) then ! gather grd_vol from gas_vol if vol in input.str

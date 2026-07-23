@@ -80,6 +80,9 @@ subroutine particle_advance
 !-- keep track of the number of particles in the particle array
   call counterreg(ct_nnonvacant,count(.not.prt_isvacant))
 
+!-- new RNG epoch: transport draws are keyed by (epoch, particle slot)
+  call rnd_advance_epoch
+
 !$omp parallel default(none) &
 !$omp shared(rnd_states,prt_npartmax,prt_isvacant, &
 !$omp    prt_x,prt_mu,prt_om,prt_e,prt_e0,prt_wl,prt_y0,prt_z0, &
@@ -141,6 +144,8 @@ subroutine particle_advance
 !-- active particle
      call prt_gather(ipart,ptcl) !copy properties out of SoA storage
      ptcl2%ipart = ipart
+!-- key the RNG for this particle: draws independent of threading
+     call rnd_seed_particle(rndstate,ipart)
      npckt = npckt+1
 
 !-- cell position

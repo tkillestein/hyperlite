@@ -181,10 +181,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
      capemitlump = grd_capemit(ig,ic)
      if(ig/=grp_ng.and.grd_divv(ix).ge.0) then ! redshift
        doplump = dopspeccalc(grd_tempinv(ic),ig)*grd_divv(ix) &
-                   /(cache%specarr(ig)*3*pc_c)
+                   /(specint0(grd_tempinv(ic),ig)*3*pc_c)
      elseif(ig/=1.and.grd_divv(ix).lt.0) then ! blueshift
        doplump = -1*dopspeccalc(grd_tempinv(ic),ig-1)*grd_divv(ix) &
-                   /(cache%specarr(ig)*3*pc_c)
+                   /(specint0(grd_tempinv(ic),ig)*3*pc_c)
      else
        doplump = 0d0
      endif
@@ -269,7 +269,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   pdop = doplump*denom
 
 !-- update specarr cache only when necessary. this is slow
-  if(r1>=pa .and. r1<pa+sum(probleak) .and. speclump>0d0 .and. &
+  if(r1>=pa+pdop .and. r1<pa+pdop+sum(probleak) .and. speclump>0d0 .and. &
         iand(cache%istat,2)==0) then
      cache%istat = cache%istat + 2
      call specintv(grd_tempinv(ic),grp_ng,cache%specarr,&
@@ -291,7 +291,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
              iiig = glumps(iig)
              if(iiig == grp_ng) cycle
              if(grd_cap(iiig+1,ic)*dist >= trn_taulump) cycle
-             specig = cache%specarr(iiig)
              resdopleak = dopspeccalc(grd_tempinv(ic),iiig)&
                           *grd_divv(ix)/(3*pc_c)
              denom2 = denom2+resdopleak*speclump*help
@@ -302,7 +301,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
              iiig = glumps(iig)
              if(iiig == 1) cycle
              if(grd_cap(iiig-1,ic)*dist >= trn_taulump) cycle
-             specig = cache%specarr(iiig)
              resdopleak = dopspeccalc(grd_tempinv(ic),iiig-1)&
                           *grd_divv(ix)/(3*pc_c)
              denom2 = denom2-resdopleak*speclump*help

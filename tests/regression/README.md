@@ -12,6 +12,9 @@ threading, reordering) without losing regression coverage, the reference is a
   identically-shaped fields).
 - `roundtrip.py` — requires the HDF5 and ASCII outputs of the *same* run to
   agree to ASCII formatting precision (~5 significant digits).
+- `compare_ensembles.py` — two-sample consistency check between two
+  reference ensembles (per-bin z-test on the means); run it whenever the
+  reference is regenerated after an intended draw-sequence change.
 - `make_reference.py` — runs the smoke case N times with distinct
   `in_rnd_seed` values and stores per-bin ensemble mean/std plus the
   deterministic anchors in `reference/smoke.h5`.
@@ -41,6 +44,16 @@ python tests/regression/make_reference.py \
 The reference records `(code version, date, n_ensemble, nmpi, nomp, case)` in
 `/meta`. The committed reference was generated with `nmpi=1, nomp=1` from the
 `tests/cases/w7/input.par.lte` W7 smoke case.
+
+Re-baseline history:
+
+- **Phase 0** (mzran): original 20-seed ensemble.
+- **Phase 5** (Philox + diffusion11 Doppler-cache fix): 20-seed ensemble.
+  The RNG swap alone was shown two-sample-consistent with the mzran
+  ensemble (max |z| 2.9); the committed reference additionally reflects
+  the `diffusion11` stale-`specarr` fix, which zeroes two spurious
+  far-UV edge bins and coherently shifts the 2100-2700 A region by
+  6-35% (total luminosity conserved to 2e-5).
 
 ## Checking a run
 
