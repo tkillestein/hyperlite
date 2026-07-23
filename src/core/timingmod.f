@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module timingmod
+      use kindmod
 c     ----------------
       implicit none
 ************************************************************************
@@ -8,44 +9,44 @@ c     ----------------
 ************************************************************************
 c-- system_clock helper variables
       integer,private :: icount_prev=-1,imax
-      real*8,private :: tick
+      real(dp),private :: tick
 c
 c-- one-time events
-      real*8 :: t_setup
-      real*8 :: t_all
+      real(dp) :: t_setup
+      real(dp) :: t_all
 c
 c-- timeline
       integer,parameter,private :: ntimeline=4
-      real*8 :: t_timelin(ntimeline+1)
-      real*8 :: t_timeline(ntimeline)
+      real(dp) :: t_timelin(ntimeline+1)
+      real(dp) :: t_timeline(ntimeline)
 c
       integer,private,parameter :: mreg = 16
-      real*8,private,target :: registers(4,mreg)
+      real(dp),private,target :: registers(4,mreg)
 c
 c-- global-flow time registers:
-      real*8,pointer :: t_gasupd(:)   !update gas
-      real*8,pointer :: t_eos(:)      !equation of state
-      real*8,pointer :: t_emitp(:)    !emission probability
-      real*8,pointer :: t_opac(:)     !all opacity
-      real*8,pointer :: t_opacleak(:) !leakage opacity
-      real*8,pointer :: t_bb(:)       !bound-bound opacity
-      real*8,pointer :: t_bf(:)       !bound-free opacity
-      real*8,pointer :: t_ff(:)       !free-free opacity
+      real(dp),pointer :: t_gasupd(:)   !update gas
+      real(dp),pointer :: t_eos(:)      !equation of state
+      real(dp),pointer :: t_emitp(:)    !emission probability
+      real(dp),pointer :: t_opac(:)     !all opacity
+      real(dp),pointer :: t_opacleak(:) !leakage opacity
+      real(dp),pointer :: t_bb(:)       !bound-bound opacity
+      real(dp),pointer :: t_bf(:)       !bound-free opacity
+      real(dp),pointer :: t_ff(:)       !free-free opacity
 c-- communication
-      real*8,pointer :: t_mpibcast(:)
-      real*8,pointer :: t_mpimisc(:)
-      real*8,pointer :: t_mpireduc(:)
+      real(dp),pointer :: t_mpibcast(:)
+      real(dp),pointer :: t_mpimisc(:)
+      real(dp),pointer :: t_mpireduc(:)
 c-- packet transport
-      real*8,pointer :: t_pcktmin(:) !collect the max runtimes across all ranks
-      real*8,pointer :: t_pcktmea(:)
-      real*8,pointer :: t_pcktmax(:)
+      real(dp),pointer :: t_pcktmin(:) !collect the max runtimes across all ranks
+      real(dp),pointer :: t_pcktmea(:)
+      real(dp),pointer :: t_pcktmax(:)
 c-- flux
-      real*8,pointer :: t_fluxtally(:)
+      real(dp),pointer :: t_fluxtally(:)
 c-- output
-      real*8,pointer :: t_output(:)
+      real(dp),pointer :: t_output(:)
 c
 c-- parallel statistics packet timer
-      real*8 :: t_pckt_stat(3)  !min,mean,max
+      real(dp) :: t_pckt_stat(3)  !min,mean,max
 c
       save
 c
@@ -76,8 +77,8 @@ c
       subroutine timereg(reg,t)
 c     -------------------------
       implicit none
-      real*8,intent(inout) :: reg(4)
-      real*8,intent(in) :: t
+      real(dp),intent(inout) :: reg(4)
+      real(dp),intent(in) :: t
 ************************************************************************
 * Put the time t in the register reg. The first position in reg stores
 * the last value of t, the second position stores the sum.
@@ -134,7 +135,7 @@ c     ------------------------
 * Print the timing totals
 ************************************************************************
       integer,parameter :: i=3 !total runtime timing
-      real*8 :: tmpi,taccounted
+      real(dp) :: tmpi,taccounted
 c
       tmpi = t_mpibcast(i)+t_mpimisc(i)+t_mpireduc(i)
       taccounted = tmpi+t_setup+t_gasupd(i)+t_opacleak(i)+t_pcktmax(i)+
@@ -169,7 +170,7 @@ c
       function t_time()
 c     ------------------
       implicit none
-      real*8 :: t_time
+      real(dp) :: t_time
 ************************************************************************
 * Determine system time in seconds since some point in history.
 * Note that the result is a single precision real, corresponding to the

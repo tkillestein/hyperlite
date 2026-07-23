@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine sourcenumbers
+  use kindmod
 
   use sourcemod
   use totalsmod
@@ -16,11 +17,11 @@ subroutine sourcenumbers
 !##################################################
 
   integer :: l,iimpi
-  integer*8 :: n,ndone
+  integer(i8) :: n,ndone
   integer :: nextra,nsmean
-  integer*8 :: nvacant(nmpi)
-  integer*8 :: nstot,nsavail,nvacantall,ncactive
-  real*8 :: etot,einv,pwr,edone,en,invn
+  integer(i8) :: nvacant(nmpi)
+  integer(i8) :: nstot,nsavail,nvacantall,ncactive
+  real(dp) :: etot,einv,pwr,edone,en,invn
   integer :: nemit,nvol
 
 !-- initialize volume numbers
@@ -115,11 +116,12 @@ end subroutine sourcenumbers
 
 
 subroutine sourcenumbers_roundrobin_limit(iimpi,nvacant,evol,ntot,mvol,nvol)
+  use kindmod
   use mpimod
   implicit none
   integer,intent(inout) :: iimpi
-  integer*8,intent(inout) :: nvacant(0:nmpi-1)
-  real*8,intent(in) :: evol
+  integer(i8),intent(inout) :: nvacant(0:nmpi-1)
+  real(dp),intent(in) :: evol
   integer,intent(in) :: ntot
   integer,intent(out) :: mvol  !particle number on all ranks
   integer,intent(out) :: nvol !particle numbers on this rank
@@ -146,7 +148,7 @@ subroutine sourcenumbers_roundrobin_limit(iimpi,nvacant,evol,ntot,mvol,nvol)
   do l=0,nmpi-1
      n = n + max(0,nvol-int(nvacant(l)))
      if(l==impi) nvol = min(nvol,int(nvacant(l))) !current rank
-     nvacant(l) = max(0,nvacant(l)-nvol)
+     nvacant(l) = max(0_i8,nvacant(l)-nvol)
   enddo
 !-- sanity check
   if(n>sum(nvacant)) stop 'srcnr_roundrobin_limit: not enough vacancies'

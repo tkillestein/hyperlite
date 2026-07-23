@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine read_nlte_data(nelem,nlte_nel)
+      use kindmod
 c     --------------------------------
       use physconstmod
       use ionsmod
@@ -16,13 +17,13 @@ c     --------------------------------
 * read all bound-bound cross sections
 ************************************************************************
       real,parameter :: fconst = sngl(pc_pi*pc_e**2/(pc_me*pc_c))
-      real*8,parameter :: Econst = 4d0*pc_pi*fconst !nLTE
+      real(dp),parameter :: Econst = 4d0*pc_pi*fconst !nLTE
       ! real,parameter :: C0 = 5.465e-11 ! pi*a0^2*(8k/(m*pi))^0.5 !nlTE
-      ! real*8,parameter :: IH = 2.178d-11 !Ionization energy of hydrogen !nLTE
-      ! real*8 :: Elu
+      ! real(dp),parameter :: IH = 2.178d-11 !Ionization energy of hydrogen !nLTE
+      ! real(dp) :: Elu
       integer :: nlinall,ilinall,nlinnlte,ilinnlte
       integer :: il,l,iz,ii,istat,llw,lhg,n!,n1
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
       logical :: ok
 c-- quick exit
       if(nlte_nel.gt.1) then
@@ -150,7 +151,8 @@ c
 c-- allocate permanent storage space for LTE line data
       if(nlinall+nlinnlte<=0) stop 'rd_bbxs_data: no sigle line read in'
       allocate(bb_xs(nlinall))
-      n = int(sizeof(bb_xs)/1024) !kB
+      n = int((storage_size(bb_xs,kind=i8)/8_i8)*
+     &  size(bb_xs,kind=i8)/1024_i8) !kB
       !n1 = int(sizeof(nlte_data)/1024) !kB
       write(6,*) 'ALLOC bb_xs    :',n,"kB",n/1024,"MB",n/1024**2,"GB"
       !write(6,*) 'ALLOC nlte_data:',n1,"kB",n1/1024,"MB",n1/1024**2,"GB"

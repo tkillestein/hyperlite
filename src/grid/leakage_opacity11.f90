@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine leakage_opacity11
+  use kindmod
 
   use miscmod
   use gridmod
@@ -14,17 +15,12 @@ subroutine leakage_opacity11
   !DDMC 1D lumped leakage opacities.
 !##################################################
   logical :: lhelp
-  integer :: i,j,k, ig,igemitmax
-  real*8 :: dist, help, emitmax
-  real*8 :: speclump, caplump, capemitlump, doplump, specval !NLTE
-  real*8 :: specarr(grp_ng)
-  real*8 :: ppl, ppr
+  integer :: i,j,k,l, ig,igemitmax
+  real(dp) :: dist, help, emitmax
+  real(dp) :: speclump, caplump, capemitlump, doplump, specval !NLTE
+  real(dp) :: specarr(grp_ng)
+  real(dp) :: ppl, ppr
   integer :: icnb(2) !neighbor cell pointers
-!-- statement functions
-  integer :: l
-  real*8 :: dx
-  dx(l) = grd_xarr(l+1) - grd_xarr(l)
-
 !
 !-- calculating leakage opacities
   do k=1,grd_nz
@@ -170,6 +166,15 @@ subroutine leakage_opacity11
   enddo !j
   enddo !k
 
+
+
+contains
+
+  pure real(dp) function dx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx = grd_xarr(l+1) - grd_xarr(l)
+  end function dx
 
 end subroutine leakage_opacity11
 ! vim: fdm=marker

@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module nltemod
+      use kindmod
 c     --------------
       implicit none
 ************************************************************************
@@ -11,38 +12,38 @@ c     --------------
       integer :: coll_nline=0 ! number of nLTE electron-impact excitation lines
       integer :: nlte_nelem=0 ! number of species treated with nlte 1 - h, 2 - he
       integer :: nlte_nspecies=0 ! number of species treated with nlte 1 - h1, 2 - h1 & he1, 3 - h1, he1 & he2
-      real*8,allocatable :: nlte_ndens(:,:,:) ! (gas_ncell,nlte_species,nlte_nel) occupation numbers for ionization states
+      real(dp),allocatable :: nlte_ndens(:,:,:) ! (gas_ncell,nlte_species,nlte_nel) occupation numbers for ionization states
 c
 c-- raw data read from file
 c-- level data type
       type nlte_raw_level_data
        integer :: id,g !label,statistical weight
-       real*8 :: chi     !in cm^-1
+       real(dp) :: chi     !in cm^-1
        integer :: n !princical quantum number
       end type nlte_raw_level_data
       type(nlte_raw_level_data),allocatable :: nlte_level(:) !nlte_nlevel
 c-- line data type
       type nlte_raw_line_data
        integer :: lev1,lev2
-       real*8 :: f,wl0 !in ang
+       real(dp) :: f,wl0 !in ang
       end type nlte_raw_line_data
       type(nlte_raw_line_data),allocatable :: nlte_line(:) !nlte_nline
 c-- Electron-impact excitation (EIE) data type
       type coll_raw_line_data
        integer :: lev1,lev2
-       real*8 :: C0,C1,C2,C3 ! 4 fit coefficients
-       real*4 :: n_coll !pre-factor coeff
-       real*8 :: delE !transition energy (eV)
+       real(dp) :: C0,C1,C2,C3 ! 4 fit coefficients
+       real(sp) :: n_coll !pre-factor coeff
+       real(dp) :: delE !transition energy (eV)
       end type coll_raw_line_data
       type(coll_raw_line_data),allocatable :: coll_line(:) !coll_nline
 c-- PI/RR transition data type
       type pi_rr_raw_line_data
        integer :: lev
-       real*8 :: C0_RR,C1_RR,C2_RR,C3_RR ! 4 fit coefficients for RR rates
-       real*4 :: n_RR !pre-factor coeff for RR rates
-       real*8 :: C0_PI,C1_PI,C2_PI,C3_PI ! 4 fit coefficients for PI rates
-       real*4 :: n_PI !pre-factor coeff for PI rates
-       real*8 :: delE !transition energy (eV)
+       real(dp) :: C0_RR,C1_RR,C2_RR,C3_RR ! 4 fit coefficients for RR rates
+       real(sp) :: n_RR !pre-factor coeff for RR rates
+       real(dp) :: C0_PI,C1_PI,C2_PI,C3_PI ! 4 fit coefficients for PI rates
+       real(sp) :: n_PI !pre-factor coeff for PI rates
+       real(dp) :: delE !transition energy (eV)
       end type pi_rr_raw_line_data
       type(pi_rr_raw_line_data),allocatable :: pi_rr_data(:) !nlte_nlevel
 c-- permanent data type
@@ -50,28 +51,28 @@ c-- NLTE data type for ionizaton stages
       type nlte_species_data
        integer :: nlev,nlin,coll_nlin !number of nlte levels and radiative and collision lines per species
       !-- level data (nlev)
-       real*8,allocatable :: chilev(:) !in cm^-1
+       real(dp),allocatable :: chilev(:) !in cm^-1
        integer,allocatable :: levid(:),nplev(:) !label,princical quantum number
-       real*8,allocatable ::glev(:) !statistical weight
+       real(dp),allocatable ::glev(:) !statistical weight
       !-- radiative line data (nlin)
        integer,allocatable :: llw(:),lup(:) !lower and upper level id for radiative lines
-       real*8,allocatable :: wl0(:) !in ang
-       real*8,allocatable :: f(:) !oscillator strength
-       real*8,allocatable :: gl(:),gu(:) !g_lower_level,g_upper_level
-       real*8,allocatable :: Aul(:),Bul(:),Blu(:) ! Einstein coefficients
-       real*8,allocatable :: qlu(:) ! collisional excitation rates !van Regemorter
+       real(dp),allocatable :: wl0(:) !in ang
+       real(dp),allocatable :: f(:) !oscillator strength
+       real(dp),allocatable :: gl(:),gu(:) !g_lower_level,g_upper_level
+       real(dp),allocatable :: Aul(:),Bul(:),Blu(:) ! Einstein coefficients
+       real(dp),allocatable :: qlu(:) ! collisional excitation rates !van Regemorter
        !-- EIE line data (coll_nlin)
        integer,allocatable :: llw_coll(:),lup_coll(:) !lower and upper level id for collison lines
-       real*8,allocatable :: C0(:),C1(:),C2(:),C3(:) !fit coefficients
-       real*4,allocatable :: n_coll(:) !pre-factor coeff
-       real*8,allocatable :: delE(:) ! EIE transition energy in eV
+       real(dp),allocatable :: C0(:),C1(:),C2(:),C3(:) !fit coefficients
+       real(sp),allocatable :: n_coll(:) !pre-factor coeff
+       real(dp),allocatable :: delE(:) ! EIE transition energy in eV
        !-- PI/RR transition data (nlev)
        integer,allocatable :: lev_PI(:) !level id for PI/RR rates
-       real*8,allocatable :: C0_PI(:),C1_PI(:),C2_PI(:),C3_PI(:) !fit coefficients for PI rates
-       real*4,allocatable :: n_PI(:) !pre-factor coeff for PI rates
-       real*8,allocatable :: C0_RR(:),C1_RR(:),C2_RR(:),C3_RR(:) !fit coefficients for RR rates
-       real*4,allocatable :: n_RR(:) !pre-factor coeff for RR rates
-       real*8,allocatable :: delE_PI(:) ! EIE transition energy in eV (for both PI and RR transition)
+       real(dp),allocatable :: C0_PI(:),C1_PI(:),C2_PI(:),C3_PI(:) !fit coefficients for PI rates
+       real(sp),allocatable :: n_PI(:) !pre-factor coeff for PI rates
+       real(dp),allocatable :: C0_RR(:),C1_RR(:),C2_RR(:),C3_RR(:) !fit coefficients for RR rates
+       real(sp),allocatable :: n_RR(:) !pre-factor coeff for RR rates
+       real(dp),allocatable :: delE_PI(:) ! EIE transition energy in eV (for both PI and RR transition)
       end type nlte_species_data
 c-- NLTE data type for an element
       type nlte_elem_data
@@ -103,11 +104,11 @@ c     ------------------------------------------
       character(13) :: fname
       character(11) :: gname
       integer :: l,istat2
-      integer(1) :: byte
+      integer(i1) :: byte
 c-- h5 read buffers
-      real*4,allocatable :: tmpf(:)
+      real(sp),allocatable :: tmpf(:)
       integer,allocatable :: tmpi(:),tmpj(:)
-      real*8,allocatable :: tmpa(:),tmpb(:),tmpc(:),tmpd(:)
+      real(dp),allocatable :: tmpa(:),tmpb(:),tmpc(:),tmpd(:)
 c
       if(h5io_atomdata_h5) then
 c
@@ -315,8 +316,8 @@ c
 * Find photospheric radius using Rosseland mean opacity for next iteration
 ************************************************************************
       integer :: i,iphot
-      real*8 :: tau(grd_ncell)
-      real*8 :: tau_phot ! to do: add a parameter in inputparmod
+      real(dp) :: tau(grd_ncell)
+      real(dp) :: tau_phot ! to do: add a parameter in inputparmod
       do i=1,grd_ncell
         tau(i) = grd_capross(i)*(grd_xarr(i+1)-grd_xarr(i))
       enddo
@@ -328,12 +329,12 @@ c
       contains
 
       pure function cumsum(A) result(B)
-      real*8,intent(in) :: A(:)
-      real*8 :: B(size(A))
+      real(dp),intent(in) :: A(:)
+      real(dp) :: B(size(A))
 ************************************************************************
 * Calculate and return cumulative sum of A from outer bound inward
 ************************************************************************
-      real*8 :: R(size(A))
+      real(dp) :: R(size(A))
       integer :: i,n
       n = size(A)
       do i=1,size(A)
@@ -362,8 +363,8 @@ c
 * next iteration
 ************************************************************************
       integer :: i,ig
-      real*8 :: wlm
-      real*8,allocatable :: Trad(:)
+      real(dp) :: wlm
+      real(dp),allocatable :: Trad(:)
 c
       allocate(Trad(grd_ncell))
 c

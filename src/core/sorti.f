@@ -1,17 +1,18 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine sorti(n,arrin,indx)
+      use kindmod
 c     ------------------------------
       implicit none
       integer,intent(in):: n
-      real*8,intent(in):: arrin(n)
+      real(dp),intent(in):: arrin(n)
       integer,intent(inout):: indx(n)
 ************************************************************************
 * index-based sorting routine taken from the routine 'indexx' by
 * press etal: 1986, 'numerical recipes', cambridge university press
 ************************************************************************
       integer :: i,j,l,ir,indxt
-      real*8 :: q
+      real(dp) :: q
       if(n.lt.1) return
       if(n.eq.1) then
        indx(1) = 1

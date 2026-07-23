@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       pure function emitgroup(r,ic) result(ig)
+      use kindmod
 c     --------------------------------------
       use miscmod
       use groupmod
@@ -9,15 +10,15 @@ c     --------------------------------------
       use inputparmod
       implicit none
       integer :: ig
-      real*8,intent(in) :: r
+      real(dp),intent(in) :: r
       integer,intent(in) :: ic
 ************************************************************************
 * Determine the group in which to emit a particle.
 ************************************************************************
-      real*8 :: r1
+      real(dp) :: r1
       integer :: l,iep,nepg,igp1
-      real*8 :: specval(grd_nepg)
-      real*8 :: emitprob
+      real(dp) :: specval(grd_nepg)
+      real(dp) :: emitprob
 c
 c-- search unnormalized cumulative emission probability values
       if(in_nlte) then !NLTE

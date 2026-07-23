@@ -1,15 +1,16 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 pure function binsrch_decr(x,arr,n,widerange)
+  use kindmod
   implicit none
   integer :: binsrch_decr
 
   integer,intent(in) :: n
-  real*8,intent(in) :: x
-  real*8,intent(in) :: arr(n) !array
+  real(dp),intent(in) :: x
+  real(dp),intent(in) :: arr(n) !array
   logical,intent(in) :: widerange
 !---------------------------------------------------
-! Binary search of a real*8 array (arr) of size n.
+! Binary search of a real(dp) array (arr) of size n.
 ! where arr is monotonically decreasing.
 ! Finds index of interval containing x.
 ! Returns an integer between 1 and n-1, inclusive, if not widerange.

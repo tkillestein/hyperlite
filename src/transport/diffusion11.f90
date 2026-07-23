@@ -2,6 +2,7 @@
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   eraddens,jrad,totevelo,ierr)
+  use kindmod
 
   use randommod
   use miscmod
@@ -18,10 +19,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   type(packet2),target,intent(inout) :: ptcl2
   type(grp_t_cache),target,intent(inout) :: cache
   type(rnd_t),intent(inout) :: rndstate
-  real*8,intent(inout) :: vx,vy,vz
-  real*8,intent(out) :: eraddens
-  real*8,intent(out) :: jrad
-  real*8,intent(inout) :: totevelo
+  real(dp),intent(inout) :: vx,vy,vz
+  real(dp),intent(out) :: eraddens
+  real(dp),intent(out) :: jrad
+  real(dp),intent(inout) :: totevelo
   integer,intent(out) :: ierr
 !##################################################
   !This subroutine passes particle parameters as input and modifies
@@ -30,40 +31,35 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   !analogous IMC transport routine through the advance. If puretran
   !is set to true, this routine is not used.
 !##################################################
-  real*8,parameter :: cinv = 1d0/pc_c
+  real(dp),parameter :: cinv = 1d0/pc_c
 !
+  integer :: l
   integer :: iig, iiig
   logical :: lhelp
-  real*8 :: r1, r2
-  real*8 :: denom, denom2, denom3
-  real*8 :: ddmct, tau, pa, pdop
+  real(dp) :: r1, r2
+  real(dp) :: denom, denom2, denom3
+  real(dp) :: ddmct, tau, pa, pdop
 !-- lumped quantities -----------------------------------------
 
-  real*8 :: emitlump, caplump, capemitlump, doplump
-  real*8 :: specig
-  real*8 :: mfphelp, ppl, ppr
-  real*8 :: opacleak(2)
-  real*8 :: probleak(2)
-  real*8 :: resopacleak, resdopleak
+  real(dp) :: emitlump, caplump, capemitlump, doplump
+  real(dp) :: specig
+  real(dp) :: mfphelp, ppl, ppr
+  real(dp) :: opacleak(2)
+  real(dp) :: probleak(2)
+  real(dp) :: resopacleak, resdopleak
   integer :: glump, gunlump
-  integer*2,pointer :: glumps(:)
-  logical*2,pointer :: llumps(:)
-  real*8,pointer :: capgreyinv
-  real*8,pointer :: capemitgreyinv
-  real*8,pointer :: speclump
-  real*8 :: dist, help
-  real*8 :: vhelp1,vhelp2,help1,help2
-  real*8 :: dummy
+  integer(i2),pointer :: glumps(:)
+  logical(lk2),pointer :: llumps(:)
+  real(dp),pointer :: capgreyinv
+  real(dp),pointer :: capemitgreyinv
+  real(dp),pointer :: speclump
+  real(dp) :: dist, help
+  real(dp) :: vhelp1,vhelp2,help1,help2
+  real(dp) :: dummy
 
   integer,pointer :: ix, ic, ig
   integer,parameter :: iy=1, iz=1
-  real*8,pointer :: x, mu, e, e0, wl
-!-- statement function
-  integer :: l
-  real*8 :: dx,dx3
-  dx(l) = grd_xarr(l+1) - grd_xarr(l)
-  dx3(l) = grd_xarr(l+1)**3 - grd_xarr(l)**3
-
+  real(dp),pointer :: x, mu, e, e0, wl
   ix => ptcl2%ix
   ic => ptcl2%ic
   ig => ptcl2%ig
@@ -81,6 +77,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
 !
   dummy = vy
   dummy = vz
+  iiig = 0 !deterministic; misuse traps under -fcheck rather than UB
 
 !-- no error by default
   ierr = 0
@@ -629,6 +626,21 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,cache,rndstate,&
   totevelo = totevelo + e*(1d0-exp(-grd_divv(ix)*ddmct/3))
   e = e*exp(-grd_divv(ix)*ddmct/3)
   e0 = e0*exp(-grd_divv(ix)*ddmct/3)
+
+
+contains
+
+  pure real(dp) function dx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx = grd_xarr(l+1) - grd_xarr(l)
+  end function dx
+
+  pure real(dp) function dx3(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx3 = grd_xarr(l+1)**3 - grd_xarr(l)**3
+  end function dx3
 
 end subroutine diffusion11
 ! vim: fdm=marker

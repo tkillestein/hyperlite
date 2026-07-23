@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module gridmod
+      use kindmod
 c     --------------
       implicit none
 c
@@ -16,11 +17,11 @@ c-- complete domain
       integer :: grd_ny=0
       integer :: grd_nz=0
 c-- spatial arrays
-      real*8,allocatable :: grd_xarr(:)  !(nx+1), left cell edge values
-      real*8,allocatable :: grd_yarr(:)  !(ny+1), left cell edge values
-      real*8,allocatable :: grd_zarr(:)  !(nz+1), left cell edge values
+      real(dp),allocatable :: grd_xarr(:)  !(nx+1), left cell edge values
+      real(dp),allocatable :: grd_yarr(:)  !(ny+1), left cell edge values
+      real(dp),allocatable :: grd_zarr(:)  !(nz+1), left cell edge values
 c-- velocity array
-      real*8,allocatable :: grd_vxarr(:)  !(nx+1), left cell edge values
+      real(dp),allocatable :: grd_vxarr(:)  !(nx+1), left cell edge values
 c
 c-- pointer into compressed domain
       integer,allocatable :: grd_icell(:,:,:) !(nx,ny,nz)
@@ -33,42 +34,42 @@ c-- compressed domain
       integer :: grd_ncell=0  !number of cells
 c
 c-- Probability of emission in a given zone and group
-      real*8,allocatable :: grd_emitprob(:,:) !(nep,ncell)
+      real(dp),allocatable :: grd_emitprob(:,:) !(nep,ncell)
 
 c-- Line+Cont extinction coeff
-      real*4,allocatable :: grd_cap(:,:) !(ng,ncell)
+      real(sp),allocatable :: grd_cap(:,:) !(ng,ncell)
 c-- Line+Cont "emission opacity" for NLTE calculations
-      real*4,allocatable :: grd_capemit(:,:) !(ng,ncell)
+      real(sp),allocatable :: grd_capemit(:,:) !(ng,ncell)
 c-- Line emissivity for output
-      real*4,allocatable :: grd_emiss(:,:) !(ng,ncell)
+      real(sp),allocatable :: grd_emiss(:,:) !(ng,ncell)
 c-- leakage opacities
-      real*8,allocatable :: grd_opaclump(:,:) !(11,ncell) leak(6),speclump,caplump,capemitlump,igemitmax,doplump
-      real*8,allocatable :: grd_tempinv(:) !(ncell)
+      real(dp),allocatable :: grd_opaclump(:,:) !(11,ncell) leak(6),speclump,caplump,capemitlump,igemitmax,doplump
+      real(dp),allocatable :: grd_tempinv(:) !(ncell)
 c-- scattering coefficient
-      real*8,allocatable :: grd_sig(:) !(ncell) !grey scattering opacity
+      real(dp),allocatable :: grd_sig(:) !(ncell) !grey scattering opacity
 c-- Planck opacity (gray)
-      real*8,allocatable :: grd_capgrey(:) !(ncell)
+      real(dp),allocatable :: grd_capgrey(:) !(ncell)
 c-- "Emission" opacity (gray) for NLTE calcualtions
-      real*8,allocatable :: grd_capemitgrey(:) !(ncell)
+      real(dp),allocatable :: grd_capemitgrey(:) !(ncell)
 c-- Rosseland mean opacity
-      real*8,allocatable :: grd_capross(:) !(ncell)
+      real(dp),allocatable :: grd_capross(:) !(ncell)
 c-- For output
-      real*8,allocatable :: grd_natom(:) !(ncell) !number of atoms
-      real*8,allocatable :: grd_nelec(:) !(ncell) !number of electrons
-      real*8,allocatable :: grd_rho(:) !(ncell)
-      real*8,allocatable :: grd_mass(:) !(ncell)
-      real*8,allocatable :: grd_radtemp(:) !(ncell)
-      real*8,allocatable :: grd_lum(:) !(ncell)
-      real*8,allocatable :: grd_ye(:) !(ncell) !electron fraction
-      real*8,allocatable :: grd_massfr(:,:) !(nelem,ncell)
+      real(dp),allocatable :: grd_natom(:) !(ncell) !number of atoms
+      real(dp),allocatable :: grd_nelec(:) !(ncell) !number of electrons
+      real(dp),allocatable :: grd_rho(:) !(ncell)
+      real(dp),allocatable :: grd_mass(:) !(ncell)
+      real(dp),allocatable :: grd_radtemp(:) !(ncell)
+      real(dp),allocatable :: grd_lum(:) !(ncell)
+      real(dp),allocatable :: grd_ye(:) !(ncell) !electron fraction
+      real(dp),allocatable :: grd_massfr(:,:) !(nelem,ncell)
 c-- cell centered radii
-      real*8,allocatable :: grd_rcell(:) !(ncell)
+      real(dp),allocatable :: grd_rcell(:) !(ncell)
 c-- divergence of velocity
-      real*8,allocatable :: grd_divv(:) !(ncell)
+      real(dp),allocatable :: grd_divv(:) !(ncell)
 c-- radiation energy density for tally
-      real*8,allocatable :: grd_tally(:)   !(ncell) (eraddens)
+      real(dp),allocatable :: grd_tally(:)   !(ncell) (eraddens)
 c-- amplification factor excess
-      real*8,allocatable :: grd_eamp(:)   !(ncell)
+      real(dp),allocatable :: grd_eamp(:)   !(ncell)
 
 
 c-- number of IMC-DDMC method changes per cell per time step
@@ -79,20 +80,21 @@ c
 c-- packet number and energy distribution
 c========================================
 c
-      real*8,allocatable :: grd_vol(:)  !(ncell)
+      real(dp),allocatable :: grd_vol(:)  !(ncell)
 c
       integer,allocatable :: grd_nvol(:) !(ncell) number of thermal source particles generated per cell
 c
-      real*8,allocatable :: grd_emit(:) !(ncell) amount of fictitious thermal energy emitted per cell in a time step
-      real*8,allocatable :: grd_emitex(:) !(ncell) amount of external energy emitted per cell in a time step
-      real*8,allocatable :: grd_evolinit(:) !(ncell) amount of initial energy per cell per group
+      real(dp),allocatable :: grd_emit(:) !(ncell) amount of fictitious thermal energy emitted per cell in a time step
+      real(dp),allocatable :: grd_emitex(:) !(ncell) amount of external energy emitted per cell in a time step
+      real(dp),allocatable :: grd_evolinit(:) !(ncell) amount of initial energy per cell per group
 c
-      real*8,allocatable :: grd_jrad(:,:) !(ng,ncell) radiation intensity per cell per group
+      real(dp),allocatable :: grd_jrad(:,:) !(ng,ncell) radiation intensity per cell per group
 c
       interface
       pure function emitgroup(r,ic) result(ig)
+      use kindmod
       integer :: ig
-      real*8,intent(in) :: r
+      real(dp),intent(in) :: r
       integer,intent(in) :: ic
       end function emitgroup
       end interface

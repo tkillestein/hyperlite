@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine leakage_opacity
+      use kindmod
 c     ----------------------------------------
       use gridmod
       use timingmod
@@ -8,7 +9,7 @@ c     ----------------------------------------
 ************************************************************************
 * wrapper
 ************************************************************************
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
 c
       t0 = t_time()
 c

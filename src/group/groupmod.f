@@ -1,24 +1,25 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module groupmod
+      use kindmod
       implicit none
 c
 c-- wavelength grid (gridmod has a copy as well)
       integer,target :: grp_ng,grp_ngs
-      real*8 :: grp_wlmin,grp_wlmax
-      real*8,allocatable :: grp_wl(:) !(grp_ng) wavelength grid
-      real*8,allocatable :: grp_wlinv(:) !(grp_ng) wavelength grid
+      real(dp) :: grp_wlmin,grp_wlmax
+      real(dp),allocatable :: grp_wl(:) !(grp_ng) wavelength grid
+      real(dp),allocatable :: grp_wlinv(:) !(grp_ng) wavelength grid
 c
       type grp_t_cache
        integer :: ic=0
        integer :: nlump !number of groups in the lump
-       real*8 :: capgreyinv
-       real*8 :: capemitgreyinv,capemitlump
-       real*8 :: speclump,emitlump,caplump,doplump
-       real*8,pointer :: specarr(:) !(grp_ng)
+       real(dp) :: capgreyinv
+       real(dp) :: capemitgreyinv,capemitlump
+       real(dp) :: speclump,emitlump,caplump,doplump
+       real(dp),pointer :: specarr(:) !(grp_ng)
        integer :: istat
-       integer*2,pointer :: glumps(:) !(grp_ng)
-       logical*2,pointer :: llumps(:) !(grp_ng) this group belongs to the lump
+       integer(i2),pointer :: glumps(:) !(grp_ng)
+       logical(lk2),pointer :: llumps(:) !(grp_ng) this group belongs to the lump
       end type grp_t_cache
 c
       save
@@ -43,8 +44,10 @@ c-- read wavelength grid from file
        call read_wlgrid(grp_ng)
       else
        allocate(grp_wl(grp_ng+1))
-       forall(ig=1:grp_ng+1) grp_wl(ig) =
-     &   grp_wlmin*(grp_wlmax/dble(grp_wlmin))**((ig-1d0)/grp_ng)
+       do ig=1,grp_ng+1
+        grp_wl(ig) =
+     &    grp_wlmin*(grp_wlmax/dble(grp_wlmin))**((ig-1d0)/grp_ng)
+       enddo
       endif
 c
       allocate(grp_wlinv(grp_ng+1))
@@ -68,7 +71,7 @@ c     --------------------------------
 * 1e-5 2e-5 4e-5 8e-5 16e-5 32e-5
 *
 ************************************************************************
-      real*8 :: help
+      real(dp) :: help
       integer :: ig
 c
       open(4,file='input.wlgrid',status='old')
@@ -100,15 +103,15 @@ c
 c     ---------------------------------------
       use physconstmod
       implicit none
-      real*8 :: specint0
-      real*8,intent(in) :: tempinv
+      real(dp) :: specint0
+      real(dp),intent(in) :: tempinv
       integer,intent(in) :: ig
 ************************************************************************
 * Calculate x**3/(exp(x) - 1), where x = h*c/(wl*k*T)
 ************************************************************************
-      real*8,parameter :: ftpi4=15d0/pc_pi**4
-      real*8,parameter :: hck=pc_h*pc_c/pc_kb
-      real*8 :: x,dx
+      real(dp),parameter :: ftpi4=15d0/pc_pi**4
+      real(dp),parameter :: hck=pc_h*pc_c/pc_kb
+      real(dp) :: x,dx
 c
       x = hck*tempinv
       dx = x*abs(grp_wlinv(ig+1) - grp_wlinv(ig))
@@ -124,15 +127,15 @@ c
 c     ---------------------------------------
       use physconstmod
       implicit none
-      real*8 :: dopspeccalc
-      real*8,intent(in) :: tempinv
+      real(dp) :: dopspeccalc
+      real(dp),intent(in) :: tempinv
       integer,intent(in) :: ig
 ************************************************************************
 * Calculate x**3/(exp(x) - 1), where x = h*c/(wl*k*T)
 ************************************************************************
-      real*8,parameter :: ftpi4=15d0/pc_pi**4
-      real*8,parameter :: hck=pc_h*pc_c/pc_kb
-      real*8 :: x
+      real(dp),parameter :: ftpi4=15d0/pc_pi**4
+      real(dp),parameter :: hck=pc_h*pc_c/pc_kb
+      real(dp) :: x
 c
       x = hck*tempinv
       x = x*grp_wlinv(ig+1)
@@ -147,26 +150,26 @@ c
 c     -----------------------------------------------
       use physconstmod
       implicit none
-      real*8,intent(in) :: tempinv
+      real(dp),intent(in) :: tempinv
       integer,intent(in) :: n
-      real*8,intent(out) :: ss(n)
+      real(dp),intent(out) :: ss(n)
       integer,intent(in),optional :: offset
       integer,intent(in),optional :: mode
-      logical*2,intent(in),optional :: mask(n)
+      logical(lk2),intent(in),optional :: mask(n)
       logical,intent(in),optional :: maskval
 ************************************************************************
 * Integrate normalized Planck spectrum using Newton-Cotes formulae of
 * different degrees.
 ************************************************************************
-      real*8,parameter :: ftpi4=15d0/pc_pi**4
-      real*8,parameter :: hck=pc_h*pc_c/pc_kb
-      real*8,parameter :: one6th=ftpi4/6d0
-      real*8,parameter :: one90th=ftpi4/90d0
-      real*8,parameter :: onehalf=ftpi4/2d0
-      real*8,parameter :: one=ftpi4
-      real*8 :: xarr(n+1)
-      real*8 :: farr(n+1)
-      real*8 :: f2arr(n)
+      real(dp),parameter :: ftpi4=15d0/pc_pi**4
+      real(dp),parameter :: hck=pc_h*pc_c/pc_kb
+      real(dp),parameter :: one6th=ftpi4/6d0
+      real(dp),parameter :: one90th=ftpi4/90d0
+      real(dp),parameter :: onehalf=ftpi4/2d0
+      real(dp),parameter :: one=ftpi4
+      real(dp) :: xarr(n+1)
+      real(dp) :: farr(n+1)
+      real(dp) :: f2arr(n)
       integer :: imode,ioff
 c
 c-- defaults
@@ -260,8 +263,8 @@ c-- invalid
 c
       contains
 c
-      elemental real*8 function f(x)
-      real*8,intent(in) :: x
+      elemental real(dp) function f(x)
+      real(dp),intent(in) :: x
       if(x>=300d0) then ! avoid overflow
         f = 300d0**3/(exp(300d0) - 1d0)
       else
@@ -276,26 +279,26 @@ c -- For Rosseland mean opacity calculation
 c     -----------------------------------------------
       use physconstmod
       implicit none
-      real*8,intent(in) :: tempinv
+      real(dp),intent(in) :: tempinv
       integer,intent(in) :: n
-      real*8,intent(out) :: ss(n)
+      real(dp),intent(out) :: ss(n)
       integer,intent(in),optional :: offset
       integer,intent(in),optional :: mode
-      logical*2,intent(in),optional :: mask(n)
+      logical(lk2),intent(in),optional :: mask(n)
       logical,intent(in),optional :: maskval
 ************************************************************************
 * Integrate normalized Planck spectrum temperature derivative
 * using Newton-Cotes formulae of different degrees.
 ************************************************************************
-      real*8,parameter :: ftpi4=15d0/(4*pc_pi**4)
-      real*8,parameter :: hck=pc_h*pc_c/pc_kb
-      real*8,parameter :: one6th=ftpi4/6d0
-      real*8,parameter :: one90th=ftpi4/90d0
-      real*8,parameter :: onehalf=ftpi4/2d0
-      real*8,parameter :: one=ftpi4
-      real*8 :: xarr(n+1)
-      real*8 :: farr(n+1)
-      real*8 :: f2arr(n)
+      real(dp),parameter :: ftpi4=15d0/(4*pc_pi**4)
+      real(dp),parameter :: hck=pc_h*pc_c/pc_kb
+      real(dp),parameter :: one6th=ftpi4/6d0
+      real(dp),parameter :: one90th=ftpi4/90d0
+      real(dp),parameter :: onehalf=ftpi4/2d0
+      real(dp),parameter :: one=ftpi4
+      real(dp) :: xarr(n+1)
+      real(dp) :: farr(n+1)
+      real(dp) :: f2arr(n)
       integer :: imode,ioff,i
 c
 c-- defaults
@@ -392,8 +395,8 @@ c
       enddo
       contains
 c
-      elemental real*8 function f(x)
-      real*8,intent(in) :: x
+      elemental real(dp) function f(x)
+      real(dp),intent(in) :: x
       if(x>=300d0) then ! avoid overflow
         f = (300d0**4*exp(300d0))/((exp(300d0) - 1d0)**2)
       else

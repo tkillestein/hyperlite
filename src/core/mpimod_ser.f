@@ -206,7 +206,7 @@ c
 c
       subroutine mpi_get_processor_name(pname,ilen_,ierr_)
       implicit none
-      character*(MPI_MAX_PROCESSOR_NAME) :: pname
+      character(MPI_MAX_PROCESSOR_NAME) :: pname
       integer :: ilen_,ierr_
       pname = 'NOT AVAILABLE'
       ierr_ = ierr

@@ -1,16 +1,17 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module randommod
+      use kindmod
       implicit none
 ************************************************************************
 * Random number generator based on mzran algorithm of Marsaglia and
 * Zaman (1993)
 ************************************************************************
-      integer*4 :: rnd_imax = 2147483579
+      integer(i4) :: rnd_imax = 2147483579
 c
 c-- a data type for storing the state of the random number generator
       type :: rnd_t
-       integer*4 :: part(4)
+       integer(i4) :: part(4)
       end type rnd_t
 c
       integer :: rnd_nstate
@@ -51,12 +52,12 @@ c
       pure subroutine rnd_i(i,state)
 c     -------------------------------
       implicit none
-      integer*4,intent(out) :: i
+      integer(i4),intent(out) :: i
       type(rnd_t),intent(inout) :: state
 ************************************************************************
 * Draws a uniform real number on [0,rnd_imax].
 ************************************************************************
-      integer*4 :: imz
+      integer(i4) :: imz
 c
       imz = state%part(1) - state%part(3)
       if(imz<0) imz = imz + 2147483579
@@ -73,12 +74,12 @@ c
       pure subroutine rnd_r(x,state)
 c     ----------------------------
       implicit none
-      real*8,intent(out) :: x
+      real(dp),intent(out) :: x
       type(rnd_t),intent(inout) :: state
 ************************************************************************
 * Draws a uniform real number on [0,1].
 ************************************************************************
-      integer*4 :: imz
+      integer(i4) :: imz
 c
       imz = state%part(1) - state%part(3)
       if(imz<0) imz = imz + 2147483579
@@ -101,7 +102,7 @@ c     -------------------------------
 * advance the random number generator n steps
 ************************************************************************
       integer :: i
-      integer*4 :: imz
+      integer(i4) :: imz
 c
       do i=1,n
        imz = state%part(1) - state%part(3)

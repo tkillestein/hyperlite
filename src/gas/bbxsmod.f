@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module bbxsmod
+      use kindmod
 c     --------------
       implicit none
 ************************************************************************
@@ -12,24 +13,24 @@ c
 c-- raw data read from file
 c-- level data type
       type bb_raw_level_data
-       real*4 :: chi     !in cm^-1
+       real(sp) :: chi     !in cm^-1
        integer :: id,g
       end type bb_raw_level_data
       type(bb_raw_level_data),allocatable :: bbxs_level(:) !bb_nlevel
 c-- line data type
       type bb_raw_line_data
        integer :: lev1,lev2
-       real*4 :: f
+       real(sp) :: f
       end type bb_raw_line_data
       type(bb_raw_line_data),allocatable :: bbxs_line(:) !bb_nline
 c
 c-- permanent data
       type bb_xs_data
-       real*4 :: wl0   !in ang
-       real*4 :: gxs   !g*xs = g*f*(pi*e**2/m_e/c)
-       real*4 :: chilw !exp(h*c*chi_low/(k*1e4))  ![chi] = cm^-1
-       integer*2 :: iz
-       integer*2 :: ii
+       real(sp) :: wl0   !in ang
+       real(sp) :: gxs   !g*xs = g*f*(pi*e**2/m_e/c)
+       real(sp) :: chilw !exp(h*c*chi_low/(k*1e4))  ![chi] = cm^-1
+       integer(i2) :: iz
+       integer(i2) :: ii
       end type bb_xs_data
       type(bb_xs_data),allocatable :: bb_xs(:) !bb_nline
 c
@@ -59,9 +60,9 @@ c     ------------------------------------------
 c-- level id
       integer :: l,lidmax,istat2
       integer,allocatable :: lid(:)
-      integer(1) :: byte
+      integer(i1) :: byte
 c-- h5 read buffers
-      real*4,allocatable :: tmpf(:)
+      real(sp),allocatable :: tmpf(:)
       integer,allocatable :: tmpi(:),tmpj(:)
 c
       if(h5io_atomdata_h5) then
@@ -188,20 +189,24 @@ c     ---------------------
 * significantly.
 ************************************************************************
       integer :: l,is,it
-      real*8,allocatable :: wl(:)  !too big for the stack
+      real(dp),allocatable :: wl(:)  !too big for the stack
       type(bb_xs_data) :: xs_src,xs_trg
       integer,allocatable :: indx(:),indx_inv(:)  !too big for the stack
 c
 c-- initialize arrays
       allocate(wl(bb_nline),indx(bb_nline),indx_inv(bb_nline))
       wl = dble(bb_xs%wl0)
-      forall(l=1:bb_nline) indx(l) = l
+      do l=1,bb_nline
+       indx(l) = l
+      enddo
 c
 c-- index sort
       call sorti(bb_nline,wl,indx)
       deallocate(wl)
 c-- reverse indx
-      forall(l=1:bb_nline) indx_inv(indx(l)) = l
+      do l=1,bb_nline
+       indx_inv(indx(l)) = l
+      enddo
 c
 c-- sort the big structure: move an element to its final position,
 c-- shifting the value there to the temporary

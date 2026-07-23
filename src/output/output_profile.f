@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine output_profile
+      use kindmod
 c     ----------------------
       use inputparmod
       use timingmod
@@ -19,8 +20,8 @@ c
       character(16) :: fstat='replace'
       character(32) :: file_name
 c
-      real*8,allocatable :: arr(:)
-      real*8 :: t0,t1
+      real(dp),allocatable :: arr(:)
+      real(dp) :: t0,t1
 c
       t0 = t_time()
 c

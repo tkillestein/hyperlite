@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine sourceenergy
+  use kindmod
 
   use gridmod
   use sourcemod
@@ -15,8 +16,8 @@ subroutine sourceenergy
 !to each cell based on the amount of energy emitted by the cell.
 !##################################################
   ! integer :: i
-  ! real*8,dimension(grd_ncell) :: P_adia
-  ! real*8,dimension(grp_ng) :: wlm,dwl
+  ! real(dp),dimension(grd_ncell) :: P_adia
+  ! real(dp),dimension(grp_ng) :: wlm,dwl
 
 ! Calculating fictitious emission energy per cell
 !-- thermal source

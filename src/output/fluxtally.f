@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine fluxtally
+      use kindmod
 c     ------------------------
       use fluxmod
       use particlemod
@@ -14,8 +15,8 @@ c     ------------------------
 ************************************************************************
       integer :: ipart
       integer :: ig,imu,iom
-      real*8 :: help
-      real*8 :: t0
+      real(dp) :: help
+      real(dp) :: t0
       type(packet),pointer :: ptcl
 c
 c-- timer

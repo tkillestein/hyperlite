@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module countersmod
+      use kindmod
 c     ------------------
       implicit none
 ************************************************************************
@@ -8,17 +9,17 @@ c     ------------------
 * This is an integer clone of timingmod.
 ************************************************************************
       integer,private,parameter :: mreg = 8
-      integer*8,private,target :: iregisters(4,mreg)
+      integer(i8),private,target :: iregisters(4,mreg)
 c
-      integer*8,pointer :: ct_nnonvacant(:) !non-vacant particle slots
-      integer*8,pointer :: ct_npcreate(:)   !newly created particles
-      integer*8,pointer :: ct_npactive(:)   !transported particles
-      integer*8,pointer :: ct_npflux(:)     !flux particles
-      integer*8,pointer :: ct_npstepimc(:)  !IMC interactions (steps)
-      integer*8,pointer :: ct_npstepddmc(:) !DDMC interactions (steps)
-      integer*8,pointer :: ct_npstepmax(:)  !interactions (steps)
+      integer(i8),pointer :: ct_nnonvacant(:) !non-vacant particle slots
+      integer(i8),pointer :: ct_npcreate(:)   !newly created particles
+      integer(i8),pointer :: ct_npactive(:)   !transported particles
+      integer(i8),pointer :: ct_npflux(:)     !flux particles
+      integer(i8),pointer :: ct_npstepimc(:)  !IMC interactions (steps)
+      integer(i8),pointer :: ct_npstepddmc(:) !DDMC interactions (steps)
+      integer(i8),pointer :: ct_npstepmax(:)  !interactions (steps)
 c-- transport method swaps
-      integer*8,pointer :: ct_npmethswap(:)
+      integer(i8),pointer :: ct_npmethswap(:)
 c
       save
 c
@@ -41,7 +42,7 @@ c
       subroutine counterreg(ireg,n)
 c     -----------------------------
       implicit none
-      integer*8,intent(inout) :: ireg(4)
+      integer(i8),intent(inout) :: ireg(4)
       integer,intent(in) :: n
 ************************************************************************
 * Put the counter c in the register reg. The first position in reg stores

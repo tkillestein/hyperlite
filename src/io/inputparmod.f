@@ -2,6 +2,7 @@
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 *See LANL_COPYING and LANL_README for details of LANL copyright assertion.
       module inputparmod
+      use kindmod
 c     ------------------
       implicit none
 ************************************************************************
@@ -32,29 +33,29 @@ c
 c-- group structure
       integer :: in_grp_ng = -1      !number of groups: 0 read wl-grid from file
       integer :: in_grp_ngs = 1      !number of subgroups per opacity group
-      real*8 :: in_grp_wlmin =   100d-8  !lower wavelength boundary [cm]
-      real*8 :: in_grp_wlmax = 32000d-8  !upper wavelength boundary [cm]
+      real(dp) :: in_grp_wlmin =   100d-8  !lower wavelength boundary [cm]
+      real(dp) :: in_grp_wlmax = 32000d-8  !upper wavelength boundary [cm]
 c
 c
 c-- outbound flux group and direction bins
       integer :: in_flx_ndim(3) = [0, 1, 1]
-      real*8 :: in_flx_wlmin =  1000d-8  !lower wavelength flux boundary [cm]
-      real*8 :: in_flx_wlmax = 32000d-8  !upper wavelength flux boundary [cm]
+      real(dp) :: in_flx_wlmin =  1000d-8  !lower wavelength flux boundary [cm]
+      real(dp) :: in_flx_wlmax = 32000d-8  !upper wavelength flux boundary [cm]
 c
 c-- interior source
       integer :: in_src_ns = 0     !number of source particles generated per time step (total over all ranks)
       integer :: in_src_n2s = -1   !2^n source particles generated per time step (total over all ranks)
-      real*8 :: in_srcepwr = 1d0  !source particle number-energy slope, 1 is linear, equal number of packets per erg.
-      real*8 :: in_L_bol = 1d0 ![erg/s] !bolometric luminosity
-      real*8 :: in_L_inner = 0d0 ![erg/s] !experimental inner boundary source
+      real(dp) :: in_srcepwr = 1d0  !source particle number-energy slope, 1 is linear, equal number of packets per erg.
+      real(dp) :: in_L_bol = 1d0 ![erg/s] !bolometric luminosity
+      real(dp) :: in_L_inner = 0d0 ![erg/s] !experimental inner boundary source
 c-- boundary source
       character(4) :: in_surfsrcmu = 'isot' !isot|beam: surface source direction distribution
-      real*8 :: in_srcmax = 0d0 !peak source strength
+      real(dp) :: in_srcmax = 0d0 !peak source strength
 c
 c-- transport
       logical :: in_trn_errorfatal = .true. !stop on transport error, disable for production runs
-      real*8 :: in_trn_tauddmc = 5d0  !number of mean free paths per cell required for DDMC
-      real*8 :: in_taulump = 10d0 !number of of mean free paths needed to lump DDMC groups
+      real(dp) :: in_trn_tauddmc = 5d0  !number of mean free paths per cell required for DDMC
+      real(dp) :: in_taulump = 10d0 !number of of mean free paths needed to lump DDMC groups
       logical :: in_puretran = .false. !use IMC only instead of IMC+DDMC hybrid
       logical :: in_trn_noamp = .true.  !disable amplification factor
       logical :: in_thm_aniso = .false. !experimental anisotropic scattering
@@ -63,7 +64,7 @@ c-- debugging
       logical :: in_noeos = .false.     !don't use the EOS
 c
 c-- physical opacities
-      real*8 :: in_opacmixrossel = 0d0 !mix rosseland with planck average, 1=pure rosseland
+      real(dp) :: in_opacmixrossel = 0d0 !mix rosseland with planck average, 1=pure rosseland
 c-- physical opacities debuging
       logical :: in_nobbopac = .false.  !turn off bound-bound opacity
       logical :: in_nobfopac = .false.  !turn off bound-bound opacity
@@ -73,7 +74,7 @@ c
 c-- experimental nebular approximation
       logical :: in_nebular = .false. ! turn on nebular approximation
 c-- photospheric radius for dilution factor
-      real*8 :: in_R_phot = -1 ![cm] photospheric radius where Rosseland mean optical depth = 1
+      real(dp) :: in_R_phot = -1 ![cm] photospheric radius where Rosseland mean optical depth = 1
 c
 c-- NLTE treatment for hydrogen b-b opacity calculations
       logical :: in_nlte = .false. ! turn on NLTE
@@ -82,16 +83,16 @@ c
 c-- analytic opacities
       character(4) :: in_opacanaltype = 'none'    !none|grey|mono|line: group opacity structure type
 c-- line specific group structure
-      real*8 :: in_ldisp1 = 1d0  !loosely speaking, the analytic odd group line strength
-      real*8 :: in_ldisp2 = 1d0  !loosely speaking, the analytic even group line strength
+      real(dp) :: in_ldisp1 = 1d0  !loosely speaking, the analytic odd group line strength
+      real(dp) :: in_ldisp2 = 1d0  !loosely speaking, the analytic even group line strength
 c-- scattering terms:
-      real*8 :: in_gas_sigcoef = 0d0  !power law absorption opacity coefficient
-      real*8 :: in_gas_sigtpwr = 0d0  !power law absorption opacity temperature exponent
-      real*8 :: in_gas_sigrpwr = 0d0  !power law absorption opacity density exponent
+      real(dp) :: in_gas_sigcoef = 0d0  !power law absorption opacity coefficient
+      real(dp) :: in_gas_sigtpwr = 0d0  !power law absorption opacity temperature exponent
+      real(dp) :: in_gas_sigrpwr = 0d0  !power law absorption opacity density exponent
 c-- absorption terms:
-      real*8 :: in_gas_capcoef = 0d0  !power law absorption opacity coefficient
-      real*8 :: in_gas_captpwr = 0d0  !power law absorption opacity temperature exponent
-      real*8 :: in_gas_caprpwr = 0d0  !power law absorption opacity density exponent
+      real(dp) :: in_gas_capcoef = 0d0  !power law absorption opacity coefficient
+      real(dp) :: in_gas_captpwr = 0d0  !power law absorption opacity temperature exponent
+      real(dp) :: in_gas_caprpwr = 0d0  !power law absorption opacity density exponent
 c
 c
 c-- output
@@ -159,7 +160,7 @@ c
       type(iptr) :: in_i(npointers)
 c
       type rptr
-       real*8,pointer :: p
+       real(dp),pointer :: p
       endtype rptr
       type(rptr) :: in_r(npointers)
 c
@@ -273,7 +274,7 @@ c
 c
       subroutine insertr(par,arr,i)
       implicit none
-      real*8,intent(in),target :: par
+      real(dp),intent(in),target :: par
       type(rptr),intent(inout) :: arr(npointers)
       integer,intent(inout) :: i
       i = i + 1

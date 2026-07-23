@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine physical_opacity
+      use kindmod
 c     ---------------------------
 c$    use omp_lib
       use physconstmod
@@ -18,37 +19,37 @@ c$    use omp_lib
 * compute bound-free and bound-bound opacity.
 ************************************************************************
       integer :: i,j
-      real*8 :: wlinv
+      real(dp) :: wlinv
 c-- timing
-      real*8 :: t0,t1,t2,t3,t4
+      real(dp) :: t0,t1,t2,t3,t4
 c-- subgridded wavelength
       integer :: ngsub
-      real*8 :: wlsub(grp_ng*grp_ngs+1)
+      real(dp) :: wlsub(grp_ng*grp_ngs+1)
 c-- helper arrays
-      real*8 :: grndlev(gas_ncell,ion_iionmax-1,gas_nelem)
-      real*8 :: hckt(gas_ncell)
-      real*8 :: hlparr(gas_ncell)
+      real(dp) :: grndlev(gas_ncell,ion_iionmax-1,gas_nelem)
+      real(dp) :: hckt(gas_ncell)
+      real(dp) :: hlparr(gas_ncell)
 c-- ffxs
-      real*8,parameter :: c1 = 4d0*pc_e**6/(3d0*pc_h*pc_me*pc_c**4)*
+      real(dp),parameter :: c1 = 4d0*pc_e**6/(3d0*pc_h*pc_me*pc_c**4)*
      &  sqrt(pc_pi2/(3*pc_me*pc_h*pc_c))
-      real*8 :: gg,u,gff,help
-      real*8 :: rgg,ru,dgg,du
+      real(dp) :: gg,u,gff,help
+      real(dp) :: rgg,ru,dgg,du
       integer :: iu,igg
 c-- bfxs
       integer :: il,ig,igs,iigs,iz,ii,ie
       logical :: dirty
-      real*8 :: en,xs,wl
+      real(dp) :: en,xs,wl
 c-- bbxs
-      real*8 :: phi,ocggrnd,wl0,dwl
-      real*8 :: expfac(gas_ncell)
-      real*8 :: caphelp
-      real*8 :: B_nu
+      real(dp) :: phi,ocggrnd,wl0,dwl
+      real(dp) :: expfac(gas_ncell)
+      real(dp) :: caphelp
+      real(dp) :: B_nu
 c-- temporary cap array in the right order
-      real*8,allocatable :: cap(:,:) !(gas_ncell,grp_ng*grp_ngs)
-      real*8,allocatable :: emiss(:,:) !(gas_ncell,grp_ng*grp_ngs)
-      real*8 :: capp(gas_ncell),capr(gas_ncell)
+      real(dp),allocatable :: cap(:,:) !(gas_ncell,grp_ng*grp_ngs)
+      real(dp),allocatable :: emiss(:,:) !(gas_ncell,grp_ng*grp_ngs)
+      real(dp) :: capp(gas_ncell),capr(gas_ncell)
 c-- thomson scattering
-      real*8,parameter :: cthomson = 8d0*pc_pi*pc_e**4/(3d0*pc_me**2
+      real(dp),parameter :: cthomson = 8d0*pc_pi*pc_e**4/(3d0*pc_me**2
      &  *pc_c**4)
 c-- warn once
       logical :: lwarn
@@ -95,9 +96,10 @@ c-- bound-bound
        do iz=1,gas_nelem
         do i=1,gas_ncell
          if(gas_mass(i)<=0d0) cycle
-         forall(ii=1:min(iz,ion_el(iz)%ni - 1))
-     &     grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)*
-     &     ion_grndlev(iz,i)%ginv(ii)
+         do ii=1,min(iz,ion_el(iz)%ni - 1)
+          grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)*
+     &      ion_grndlev(iz,i)%ginv(ii)
+         enddo
         enddo !i
        enddo !iz
 c
@@ -165,8 +167,9 @@ c
        do iz=1,gas_nelem
         do i=1,gas_ncell
          if(gas_mass(i)<=0d0) cycle
-         forall(ii=1:min(iz,ion_el(iz)%ni - 1))
-     &    grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)
+         do ii=1,min(iz,ion_el(iz)%ni - 1)
+          grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)
+         enddo
         enddo !i
        enddo !iz
 c
@@ -182,9 +185,11 @@ c$omp& shared(ngsub,gas_ncell,gas_mass,grndlev,wlsub,cap,ion_el)
           ie = iz - ii + 1
           xs = bfxs(iz,ie,en)
           if(xs==0d0) cycle
-          forall(i=1:gas_ncell,.not.gas_mass(i)<=0d0)
-     &      cap(i,igs) = cap(i,igs) +
-     &      xs*pc_mbarn*grndlev(i,ii,iz)
+          do i=1,gas_ncell
+           if(gas_mass(i)<=0d0) cycle
+           cap(i,igs) = cap(i,igs) +
+     &       xs*pc_mbarn*grndlev(i,ii,iz)
+          enddo
          enddo !ie
         enddo !iz
 !       write(6,*) 'wl done:',igs !DEBUG

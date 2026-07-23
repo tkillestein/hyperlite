@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module mpimod
+      use kindmod
 c     -------------
       implicit none
       INCLUDE 'mpif.h'
@@ -46,7 +47,7 @@ c     --------------------------
       integer :: ntemp
       logical,allocatable :: lsndvec(:)
       integer,allocatable :: isndvec(:)
-      real*8,allocatable :: sndvec(:)
+      real(dp),allocatable :: sndvec(:)
       character(4),allocatable :: csndvec(:)
 c
 c-- inputparmod variables
@@ -198,11 +199,11 @@ c     ---------------------
 * broadcast the ions data structure
 ************************************************************************
       integer :: ii,iz,iion,n
-      real*8 :: vec(11000)
+      real(dp) :: vec(11000)
       logical :: vecl(11000)
       integer :: nion(gas_nelem)
       integer :: nlev(ion_nion)
-      real*8 :: e(ion_nion)
+      real(dp) :: e(ion_nion)
 c
 c-- evaluate shape info
       if(lmpi0) then
@@ -274,7 +275,7 @@ c
 * broadcast the nlte data structure
 ************************************************************************
       integer :: ii,iz,isp,n
-      real*8 :: vec(10000)
+      real(dp) :: vec(10000)
       real :: vec1(10000)
       integer :: vecn(10000)
       integer :: nlin(nlte_nspecies),nlev1(nlte_nspecies) ! currently 1 species - h1
@@ -655,10 +656,10 @@ c     -----------------------------
 ************************************************************************
 * Broadcast the data that changes with time/temperature.
 ************************************************************************
-      real*8 :: t0,t1
-      real*8 :: sndgas(gas_ncell)
-      real*8 :: sndgrd(grd_ncell)
-      integer*8 :: nvacant
+      real(dp) :: t0,t1
+      real(dp) :: sndgas(gas_ncell)
+      real(dp) :: sndgrd(grd_ncell)
+      integer(i8) :: nvacant
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -740,8 +741,8 @@ c     ------------------------------------------
       implicit none
 ************************************************************************
       integer :: n
-      real*8,allocatable :: snd(:,:)
-      real*8 :: t0,t1
+      real(dp),allocatable :: snd(:,:)
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -782,9 +783,9 @@ c     -----------------------
 ************************************************************************
       integer :: n
       integer,allocatable :: isnd(:)
-      real*8,allocatable :: snd(:)
-      real*8 :: help
-      real*8 :: t0,t1
+      real(dp),allocatable :: snd(:)
+      real(dp) :: help
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -841,8 +842,8 @@ c     -----------------------
 * Reduce the results from particle_advance for radiation intensity
 ************************************************************************
       integer :: n
-      real*8,allocatable :: snd2(:,:)
-      real*8 :: t0,t1
+      real(dp),allocatable :: snd2(:,:)
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -871,8 +872,8 @@ c
 * scatter the results for radiation intensity to all ranks
 ************************************************************************
       integer :: n
-      real*8,allocatable :: snd(:),snd2(:,:)
-      real*8 :: t0,t1
+      real(dp),allocatable :: snd(:),snd2(:,:)
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -907,7 +908,7 @@ c     ---------------------------
 ************************************************************************
       integer :: n
       integer :: isnd2f(grd_ncell,grp_ng)
-      real*8 :: snd2f(grd_ncell,grp_ng)
+      real(dp) :: snd2f(grd_ncell,grp_ng)
 c
 c-- flux dim==3
       n = grd_ncell*grp_ng
@@ -932,7 +933,7 @@ c     ---------------------------
 ************************************************************************
       integer :: n
       integer :: isnd3f(flx_ng,flx_nmu,flx_nom)
-      real*8 :: snd3f(flx_ng,flx_nmu,flx_nom)
+      real(dp) :: snd3f(flx_ng,flx_nmu,flx_nom)
 c
 c-- flux dim==3
       n = flx_ng*flx_nmu*flx_nom
@@ -963,8 +964,8 @@ c     -------------------------------------
 * for output
 ************************************************************************
       integer :: n
-      real*8,allocatable :: sndvec(:),rcvvec(:)
-      real*8 :: t0,t1
+      real(dp),allocatable :: sndvec(:),rcvvec(:)
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()
@@ -1009,7 +1010,7 @@ c
 ************************************************************************
       integer :: n
       logical :: lstat = .false.
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
 c
       call mpi_barrier(MPI_COMM_WORLD,ierr)
       t0 = t_time()

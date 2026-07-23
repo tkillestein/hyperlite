@@ -2,6 +2,7 @@
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   eraddens,eamp,jrad,totevelo,ierr)
+  use kindmod
 
   use randommod
   use miscmod
@@ -16,10 +17,10 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   type(packet),target,intent(inout) :: ptcl
   type(packet2),target,intent(inout) :: ptcl2
   type(rnd_t),intent(inout) :: rndstate
-  real*8,intent(inout) :: vx,vy,vz
-  real*8,intent(out) :: eraddens, eamp
-  real*8,intent(out) :: jrad
-  real*8,intent(inout) :: totevelo
+  real(dp),intent(inout) :: vx,vy,vz
+  real(dp),intent(out) :: eraddens, eamp
+  real(dp),intent(out) :: jrad
+  real(dp),intent(inout) :: totevelo
   integer,intent(out) :: ierr
 !##################################################
 !This subroutine passes particle parameters as input and modifies
@@ -27,41 +28,35 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !the puretran boolean is set to false, this routine couples to the
 !analogous DDMC diffusion routine through the advance.
 !##################################################
-  real*8,parameter :: cinv = 1d0/pc_c
+  real(dp),parameter :: cinv = 1d0/pc_c
 
   logical :: lout
+  integer :: l
   integer :: ixnext
-  real*8 :: r1, r2
-  real*8 :: db, dcol, dthm, ddop
-  real*8 :: darr(4)
-  real*8 :: elabfact,elabfactold
-  real*8 :: xold, muold
-  real*8 :: help
+  real(dp) :: r1, r2
+  real(dp) :: db, dcol, dthm, ddop
+  real(dp) :: darr(4)
+  real(dp) :: elabfact,elabfactold
+  real(dp) :: xold, muold
+  real(dp) :: help
 !-- distance out of physical reach
-  real*8 :: far
-  real*8 :: emitlump
+  real(dp) :: far
+  real(dp) :: emitlump
 !-- interpolate velocity
-  real*8 :: vhelp,vhelp1,vhelp2,help1,help2
-  real*8 :: dummy
+  real(dp) :: vhelp,vhelp1,vhelp2,help1,help2
+  real(dp) :: dummy
 
   integer,pointer :: ix,ic,ig
   integer,parameter :: iy=1, iz=1
-  real*8,pointer :: x, mu, e, e0, wl, d
+  real(dp),pointer :: x, mu, e, e0, wl, d
 !-- anisotropic Thomson scattering
-  real*8 :: mutemp,muhelp,munew1,munew2,B,C
+  real(dp) :: mutemp,muhelp,munew1,munew2,B,C
 !-- Doppler distance calculations
-  real*8 :: wlhelp!,vxhelp,labfacthelp
+  real(dp) :: wlhelp!,vxhelp,labfacthelp
   ! logical :: lsuplum
-  real*8 :: shelp,xhelp,epstol,phi,dphi
+  real(dp) :: shelp,xhelp,epstol,phi,dphi
   integer :: it
 
-!-- statement function
-  integer :: l
-  real*8 :: dx
-  real*8 :: dvx, dvdr
-  dx(l) = grd_xarr(l+1) - grd_xarr(l)
-  dvx(l) = grd_vxarr(l+1) - grd_vxarr(l)
-  dvdr(l) = dvx(l) / dx(l)
 
   ix => ptcl2%ix
   ic => ptcl2%ic
@@ -511,6 +506,27 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !       wl = wlhelp
 !     endif
 !   endif
+
+
+contains
+
+  pure real(dp) function dx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx = grd_xarr(l+1) - grd_xarr(l)
+  end function dx
+
+  pure real(dp) function dvx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dvx = grd_vxarr(l+1) - grd_vxarr(l)
+  end function dvx
+
+  pure real(dp) function dvdr(l)
+    use kindmod
+    integer, intent(in) :: l
+    dvdr = dvx(l) / dx(l)
+  end function dvdr
 
 end subroutine transport11
 ! vim: fdm=marker

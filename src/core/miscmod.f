@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module miscmod
+      use kindmod
 c     --------------
       implicit none
 ************************************************************************
@@ -9,40 +10,46 @@ c     --------------
       interface
 c
       function memusg() result(mbsize)
+      use kindmod
       integer :: mbsize(2)
       end function memusg
 c
       subroutine warn(source,mesg,sunt)
+      use kindmod
       character(*),intent(in) :: source
       character(*),intent(in) :: mesg
       character(*),intent(in),optional :: sunt
       end subroutine warn
 c
       function lcase(input_string) result(output_string)
+      use kindmod
       character(*),intent(in) :: input_string
       character(len(input_string)) :: output_string
       end function lcase
 c
       elemental function specint(t1,t2,n,m) result(ss)
-      real*8 :: ss
+      use kindmod
+      real(dp) :: ss
       integer,intent(in) :: n
-      real*8,intent(in) :: t1,t2
+      real(dp),intent(in) :: t1,t2
       integer,intent(in),optional :: m
       end function specint
 c
       pure function binsrch(x,arr,ng,widerange)
+      use kindmod
       integer :: binsrch
       integer,intent(in) :: ng
-      real*8,intent(in) :: x
-      real*8,intent(in) :: arr(ng)
+      real(dp),intent(in) :: x
+      real(dp),intent(in) :: arr(ng)
       logical,intent(in) :: widerange
       end function binsrch
 c
       pure function binsrch_decr(x,arr,ng,widerange)
+      use kindmod
       integer :: binsrch_decr
       integer,intent(in) :: ng
-      real*8,intent(in) :: x
-      real*8,intent(in) :: arr(ng)
+      real(dp),intent(in) :: x
+      real(dp),intent(in) :: arr(ng)
       logical,intent(in) :: widerange
       end function binsrch_decr
 c

@@ -1,32 +1,33 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module ionsmod
+      use kindmod
 c     --------------
       implicit none
 c
       integer,private :: nelem=0 !private copy (public in gasmod) value is obtained in ion_read_data
       integer :: ion_iionmax     !max number of ions an element has
       integer :: ion_nion=0      !total number of ions of all elements
-      real*8,allocatable :: zeta_temp(:) !temperature array corresponding to zeta values for nebular approximation
+      real(dp),allocatable :: zeta_temp(:) !temperature array corresponding to zeta values for nebular approximation
 c
       integer,private :: ncell=0 !number of cells
 c
       type leveldata
-       real*8 :: e     !ionization energy [erg]
-       real*8 :: q     !partition function (sum)
-       real*8 :: n     !number density
+       real(dp) :: e     !ionization energy [erg]
+       real(dp) :: q     !partition function (sum)
+       real(dp) :: n     !number density
 c
        integer :: nlev !number of levels
-       real*8,allocatable :: elev(:) !exp(en) excitation energy [erg]
-       real*8,allocatable :: glev(:) !degeneration count
+       real(dp),allocatable :: elev(:) !exp(en) excitation energy [erg]
+       real(dp),allocatable :: glev(:) !degeneration count
        logical,allocatable :: meta(:) !metastability !nebular approximation
-       real*8,allocatable :: zval(:) !zeta values !nebular approximation
+       real(dp),allocatable :: zval(:) !zeta values !nebular approximation
       end type leveldata
 c
 c-- element configuration
       type elemconf
        integer :: ni   !number of ions
-       real*8 :: ne    !number of electrons (relative to normalized total number of atoms (of this element))
+       real(dp) :: ne    !number of electrons (relative to normalized total number of atoms (of this element))
        type(leveldata),allocatable :: i(:)
       end type elemconf
       type(elemconf),allocatable :: ion_el(:) !(nelem)
@@ -34,8 +35,8 @@ c
 c-- ocupation number and g value of all ion's ground states
       type ocground
        integer :: ni   !number of ions
-       real*8,allocatable :: oc(:)
-       real*8,allocatable :: ginv(:)
+       real(dp),allocatable :: oc(:)
+       real(dp),allocatable :: ginv(:)
       end type ocground
       type(ocground),allocatable :: ion_grndlev(:,:) !(nelem,gas_ncell)
 c
@@ -162,9 +163,9 @@ c     --------------------------------------------------------
       use physconstmod
       use miscmod, only:warn
       implicit none
-      real*8,intent(in) :: natomfr(nelem)
-      real*8,intent(in) :: temp,ndens
-      real*8,intent(inout) :: nelec
+      real(dp),intent(in) :: natomfr(nelem)
+      real(dp),intent(in) :: temp,ndens
+      real(dp),intent(inout) :: nelec
       integer,intent(out) :: iconv
 ************************************************************************
 * solve LTE equation of state. Solve the Saha equation for all elements
@@ -180,17 +181,17 @@ c     --------------------------------------------------------
 *          where sum(natomfr)==1
 ************************************************************************
       integer,parameter :: nconv=40 !max number of convergence iterations
-      real*8,parameter :: acc=1d-8 !accuracy requirment for convergence
+      real(dp),parameter :: acc=1d-8 !accuracy requirment for convergence
       integer :: ii,iz,iprev,ihelp
-      real*8 :: kti,sahac,sahac2 !constants
-      real*8 :: help
+      real(dp) :: kti,sahac,sahac2 !constants
+      real(dp) :: help
 c
       type nelec_conv !save two values for linear inter/extra-polation
-       real*8 :: nel(2) !nelec
-       real*8 :: err(2) !error
+       real(dp) :: nel(2) !nelec
+       real(dp) :: err(2) !error
       end type nelec_conv
       type(nelec_conv) :: nec
-      real*8 :: nelec_new,err,dxdy,ynew
+      real(dp) :: nelec_new,err,dxdy,ynew
 c
 c-- constant
       kti = 1d0/(pc_kb*temp)
@@ -298,13 +299,13 @@ c
       subroutine saha_nelec(nelec)
 c     -----------------------------------
       implicit none
-      real*8,intent(out) :: nelec
+      real(dp),intent(out) :: nelec
 ************************************************************************
 * solve saha equations, updating the ionization balance, for a given
 * nelec and temperature (both within sahac2) and return a new nelec.
 ************************************************************************
       integer :: ii,iz,nion,istart
-      real*8 :: nsum
+      real(dp) :: nsum
 c
       do iz=1,nelem
        nion = ion_el(iz)%ni
@@ -363,9 +364,9 @@ c     -----------------------------------
       use inputparmod
       use miscmod, only:warn
       implicit none
-      real*8,intent(in) :: natomfr(nelem)
-      real*8,intent(in) :: temp,radtemp,rcell,ndens
-      real*8,intent(inout) :: nelec
+      real(dp),intent(in) :: natomfr(nelem)
+      real(dp),intent(in) :: temp,radtemp,rcell,ndens
+      real(dp),intent(inout) :: nelec
 ************************************************************************
 * correct the ionization balance using nebular approximation as
 * described in Mazzali & Lucy 1993 A&A 279 447. Zeta values are read in
@@ -383,22 +384,22 @@ c     -----------------------------------
 *          where sum(natomfr)==1
 ************************************************************************
       integer,parameter :: nconv=40 !max number of convergence iterations
-      real*8,parameter :: acc=1d-8 !accuracy requirment for convergence
+      real(dp),parameter :: acc=1d-8 !accuracy requirment for convergence
       integer :: iconv,ihelp,iprev
       integer :: il,ii,iz,ize,istart,ntemp,niter,nion
-      real*8 :: ktei,ktri,delta,chi_0,W,b,help,zeta
+      real(dp) :: ktei,ktri,delta,chi_0,W,b,help,zeta
 c-- ion population ratios
       type phi_vals ! values of phi for lte and nebular approximation
-        real*8,allocatable :: phis(:) ! phi_{i,j+1/j}
+        real(dp),allocatable :: phis(:) ! phi_{i,j+1/j}
       end type phi_vals
       type(phi_vals), allocatable :: phi_lte(:),phi_nlte(:),phi_cp(:)
 c
       type nelec_conv !save two values for linear inter/extra-polation
-       real*8 :: nel(2) !nelec
-       real*8 :: err(2) !error
+       real(dp) :: nel(2) !nelec
+       real(dp) :: err(2) !error
       end type nelec_conv
       type(nelec_conv) :: nec
-      real*8 :: nelec_new,err,dxdy,ynew,ne_dens
+      real(dp) :: nelec_new,err,dxdy,ynew,ne_dens
 c-- default values
       nec%err(:) = (/1d10,-1d10/)
 c-- constants
@@ -531,13 +532,13 @@ c       nelec = max(1d-5*nelec_new,nelec) !limit
 
       subroutine nebular_nelec(nelec)
       implicit none
-      real*8,intent(out) :: nelec
+      real(dp),intent(out) :: nelec
 ************************************************************************
 * solve for nelec, updating the ionization balance using nebular
 * approximation and return a new nelec.
 ************************************************************************
       integer :: ii,iz,nion,istart
-      real*8 :: help,nsum
+      real(dp) :: help,nsum
 
       do iz=1,nelem
        nion = ion_el(iz)%ni
@@ -597,12 +598,13 @@ c-- compute new electron density
       pure integer function itarget(target,arr,size)
 c     ----------------------------------
       integer, intent(in) :: size
-      real*8,intent(in) :: target
-      real*8,intent(in) :: arr(size)
+      real(dp),intent(in) :: target
+      real(dp),intent(in) :: arr(size)
 ************************************************************************
 * search value closest to, but less than the target in an ordered array
 ************************************************************************
       integer :: il,ih,im
+      itarget = size !deterministic fall-through
       il = 1
       ih = size
 c
@@ -631,12 +633,12 @@ c
       function interp1d(ix,x,x_arr,y_arr) result(y)
 c     ----------------------------------
       integer, intent(in) :: ix
-      real*8,intent(in) :: x,x_arr(:),y_arr(:)
-      real*8 :: y
+      real(dp),intent(in) :: x,x_arr(:),y_arr(:)
+      real(dp) :: y
 ****************************************************************
 * 1d interpolation, assumes monotonicity
 ****************************************************************
-      real*8 :: help
+      real(dp) :: help
 c
       help = (x-x_arr(ix)) * (y_arr(ix+1)-y_arr(ix))
       help = help / (x_arr(ix+1)-x_arr(ix))
@@ -665,14 +667,14 @@ c     ----------------------------------
       integer :: l,ll,iz,ii,icod,nlevel
       integer :: ntemp,nzeta !nebular approximation
       integer :: istat
-      real*8 :: help
+      real(dp) :: help
       character(80) :: line
       character(80) :: line1
-      real*8,allocatable :: rawzeta(:) !nebular approximation
+      real(dp),allocatable :: rawzeta(:) !nebular approximation
 c
 c-- raw level data
       type raw_level_data
-       real*8 :: chi
+       real(dp) :: chi
        character(12) :: label
        integer :: ilevel
        integer :: g
@@ -688,11 +690,11 @@ c-- allocate data structure
       do iz=1,nelem
        ion_el(iz)%ni = iz+1 !include the bare nucleus
        allocate(ion_el(iz)%i(iz+1))
-       forall(l=1:iz+1)
+       do l=1,iz+1
         ion_el(iz)%i(l)%nlev = 0
         ion_el(iz)%i(l)%e = 0d0
         ion_el(iz)%i(l)%q = 0d0
-       endforall
+       enddo
       enddo
 c
 c-- read from the bundled hdf5 atomic data
@@ -854,7 +856,7 @@ c     ----------------------------
       logical :: ok
       integer,allocatable :: icodv(:),nlevv(:),offv(:),gv(:),metav(:)
       integer,allocatable :: izv(:),iiv(:)
-      real*8,allocatable :: chiionv(:),chiv(:),zval(:,:)
+      real(dp),allocatable :: chiionv(:),chiv(:),zval(:,:)
 c
       call h5io_ropen('atomic.h5',ok)
       if(.not.ok) stop 'ions_read_data: cannot read atomic.h5'

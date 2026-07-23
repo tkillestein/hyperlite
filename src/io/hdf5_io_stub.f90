@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 module hdf5_io
+  use kindmod
 !***********************************************************************
 ! No-op stand-in for the HDF5 wrappers, compiled when the build has no
 ! HDF5 Fortran library (HYPERLITE_HDF5=OFF, e.g. the ifx CI job whose
@@ -54,13 +55,13 @@ contains
 
   subroutine h5io_write_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:)
+    real(dp), intent(in) :: arr(:)
     if(.false.) write(6,*) path, arr(1)
   end subroutine h5io_write_d1
 
   subroutine h5io_write_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:,:)
+    real(dp), intent(in) :: arr(:,:)
     if(.false.) write(6,*) path, arr(1,1)
   end subroutine h5io_write_d2
 
@@ -72,7 +73,7 @@ contains
 
   subroutine h5io_append_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:)
+    real(dp), intent(in) :: arr(:)
     if(.false.) write(6,*) path, arr(1)
   end subroutine h5io_append_d1
 
@@ -84,7 +85,7 @@ contains
 
   subroutine h5io_append_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:,:)
+    real(dp), intent(in) :: arr(:,:)
     if(.false.) write(6,*) path, arr(1,1)
   end subroutine h5io_append_d2
 
@@ -96,7 +97,7 @@ contains
 
   subroutine h5io_append_r2(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(in) :: arr(:,:)
+    real(sp), intent(in) :: arr(:,:)
     if(.false.) write(6,*) path, arr(1,1)
   end subroutine h5io_append_r2
 
@@ -135,7 +136,7 @@ contains
 
   subroutine h5io_read_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(out) :: arr(:)
+    real(dp), intent(out) :: arr(:)
     arr = 0d0
     stop 'hdf5_io stub: h5io_read_d1 called in a no-HDF5 build'
     if(.false.) write(6,*) path
@@ -143,7 +144,7 @@ contains
 
   subroutine h5io_read_f1(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(out) :: arr(:)
+    real(sp), intent(out) :: arr(:)
     arr = 0.
     stop 'hdf5_io stub: h5io_read_f1 called in a no-HDF5 build'
     if(.false.) write(6,*) path
@@ -151,7 +152,7 @@ contains
 
   subroutine h5io_read_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(out) :: arr(:,:)
+    real(dp), intent(out) :: arr(:,:)
     arr = 0d0
     stop 'hdf5_io stub: h5io_read_d2 called in a no-HDF5 build'
     if(.false.) write(6,*) path
@@ -159,7 +160,7 @@ contains
 
   subroutine h5io_read_f2(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(out) :: arr(:,:)
+    real(sp), intent(out) :: arr(:,:)
     arr = 0.
     stop 'hdf5_io stub: h5io_read_f2 called in a no-HDF5 build'
     if(.false.) write(6,*) path

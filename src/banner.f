@@ -7,13 +7,13 @@ c     -----------------
 ************************************************************************
 * Print banner, start date/time, and code revision.
 ************************************************************************
-      character*8 :: t_startdate
-      character*10 :: t_starttime
+      character(8) :: t_startdate
+      character(10) :: t_starttime
 c
-      character*(MPI_MAX_PROCESSOR_NAME) :: pname
+      character(MPI_MAX_PROCESSOR_NAME) :: pname
       integer :: ilen,ierr
 c
-      character*40 :: coderev_id='r1.0.1'
+      character(40) :: coderev_id='r1.0.1'
 c      include 'version.inc'
 c
       call date_and_time(t_startdate,t_starttime)

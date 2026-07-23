@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 module hdf5_io
+  use kindmod
 !***********************************************************************
 ! Thin wrappers over the HDF5 Fortran interface for the hyperlite
 ! output file (output.h5) and, later, atomic-data input.
@@ -125,7 +126,7 @@ contains
 !======================
   subroutine h5io_write_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:)
+    real(dp), intent(in) :: arr(:)
     integer(hid_t) :: sid, did
     integer(hsize_t) :: dims(1)
     integer :: ierr
@@ -141,7 +142,7 @@ contains
 
   subroutine h5io_write_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:,:)
+    real(dp), intent(in) :: arr(:,:)
     integer(hid_t) :: sid, did
     integer(hsize_t) :: dims(2)
     integer :: ierr
@@ -235,7 +236,7 @@ contains
 
   subroutine h5io_append_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:)
+    real(dp), intent(in) :: arr(:)
     integer(hid_t) :: did, fspace, mspace
     integer(hsize_t) :: dfix(1), dims(2)
     integer :: ierr
@@ -269,7 +270,7 @@ contains
 
   subroutine h5io_append_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(in) :: arr(:,:)
+    real(dp), intent(in) :: arr(:,:)
     integer(hid_t) :: did, fspace, mspace
     integer(hsize_t) :: dfix(2), dims(3)
     integer :: ierr
@@ -303,7 +304,7 @@ contains
 
   subroutine h5io_append_r2(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(in) :: arr(:,:)
+    real(sp), intent(in) :: arr(:,:)
     integer(hid_t) :: did, fspace, mspace
     integer(hsize_t) :: dfix(2), dims(3)
     integer :: ierr
@@ -412,7 +413,7 @@ contains
 
   subroutine h5io_read_d1(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(out) :: arr(:)
+    real(dp), intent(out) :: arr(:)
     integer(hid_t) :: did
     integer(hsize_t) :: dims(1)
     integer :: ierr
@@ -425,7 +426,7 @@ contains
 
   subroutine h5io_read_f1(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(out) :: arr(:)
+    real(sp), intent(out) :: arr(:)
     integer(hid_t) :: did
     integer(hsize_t) :: dims(1)
     integer :: ierr
@@ -438,7 +439,7 @@ contains
 
   subroutine h5io_read_d2(path, arr)
     character(*), intent(in) :: path
-    real*8, intent(out) :: arr(:,:)
+    real(dp), intent(out) :: arr(:,:)
     integer(hid_t) :: did
     integer(hsize_t) :: dims(2)
     integer :: ierr
@@ -451,7 +452,7 @@ contains
 
   subroutine h5io_read_f2(path, arr)
     character(*), intent(in) :: path
-    real*4, intent(out) :: arr(:,:)
+    real(sp), intent(out) :: arr(:,:)
     integer(hid_t) :: did
     integer(hsize_t) :: dims(2)
     integer :: ierr

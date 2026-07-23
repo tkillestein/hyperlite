@@ -2,6 +2,7 @@
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 !See LANL_COPYING and LANL_README for details of LANL copyright assertion.
 subroutine boundary_source
+  use kindmod
 
   use randommod
   use particlemod
@@ -16,11 +17,11 @@ subroutine boundary_source
   implicit none
 
   integer :: ipart, ivac, ig, iig, i,j,k,l
-  real*8 :: r1, r2, mu0, esurfpart, wl0
-  real*8 :: denom2!, wl1, wl2
-  real*8 :: srftemp = 1d4
+  real(dp) :: r1, r2, mu0, esurfpart, wl0
+  real(dp) :: denom2!, wl1, wl2
+  real(dp) :: srftemp = 1d4
   type(packet) :: ptcl
-  real*8, dimension(grp_ng) :: emitsurfprobg  !surface emission probabilities
+  real(dp), dimension(grp_ng) :: emitsurfprobg  !surface emission probabilities
 
   esurfpart = tot_esurf/dble(src_nsurftot)
 
@@ -58,6 +59,7 @@ subroutine boundary_source
 
 !-- calculating wavelength
     denom2 = 0d0
+    iig = grp_ng !deterministic fall-through (always reassigned in loop)
     call rnd_r(r1,rnd_state)
     do ig = 1, grp_ng
       iig = ig
@@ -69,6 +71,7 @@ subroutine boundary_source
     wl0 = 1d0/((1d0-r1)*grp_wlinv(iig)+r1*grp_wlinv(iig+1))
 
 !-- sampling surface projection
+    mu0 = 1d0 !deterministic default (in_surfsrcmu validated at parse)
     if(in_surfsrcmu=='beam') then
       mu0 = 1d0
     elseif(in_surfsrcmu=='isot') then

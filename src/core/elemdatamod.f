@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module elemdatamod
+      use kindmod
 c     ------------------
       implicit none
 ************************************************************************
@@ -10,9 +11,9 @@ c     ------------------
       integer,private :: i
 c
       type element_data
-       real*8       :: m
-       character*2  :: sym
-       character*14 :: nam
+       real(dp)       :: m
+       character(2)  :: sym
+       character(14) :: nam
       end type element_data
       type(element_data) :: elem_data(elem_neldata)
 c

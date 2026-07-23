@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine read_bbxs_data(nelem)
+      use kindmod
 c     --------------------------------
       use physconstmod
       use ionsmod
@@ -16,7 +17,7 @@ c     --------------------------------
       real,parameter :: fconst = sngl(pc_pi*pc_e**2/(pc_me*pc_c))
       integer :: nlinall,ilinall
       integer :: l,iz,ii,istat,llw,lhg,n
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
       logical :: ok
 c
 c-- quick exit
@@ -49,7 +50,8 @@ c
 c-- allocate permanent storage space for line data
       if(nlinall<=0) stop 'rd_bbxs_data: no sigle line read in'
       allocate(bb_xs(nlinall))
-      n = int(sizeof(bb_xs)/1024) !kB
+      n = int((storage_size(bb_xs,kind=i8)/8_i8)*
+     &  size(bb_xs,kind=i8)/1024_i8) !kB
       write(6,*) 'ALLOC bb_xs    :',n,"kB",n/1024,"MB",n/1024**2,"GB"
 c
       t0 = t_time()

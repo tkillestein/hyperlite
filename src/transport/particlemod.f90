@@ -1,18 +1,19 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 module particlemod
+  use kindmod
 
   implicit none
 
   type packet
-     real*8 :: x, y, z
-     real*8 :: mu, om
-     real*8 :: e, e0, wl
+     real(dp) :: x, y, z
+     real(dp) :: mu, om
+     real(dp) :: e, e0, wl
   end type packet
 !
 !-- secondary particle properties
   type packet2
-     real*8 :: dist          !particle travel distance
+     real(dp) :: dist          !particle travel distance
      character(4) :: stat    !particle status: live, cens, flux, dead
      integer :: ix, iy, iz   !positional cell indices
      integer :: ic, ig       !index into compressed domain arrays, group index
@@ -43,7 +44,8 @@ module particlemod
 !
 !-- print size only on master rank
     if(ltalk) then
-      n = int(sizeof(prt_particles)/1024) !kB
+      n = int((storage_size(prt_particles,kind=i8)/8_i8)* &
+        size(prt_particles,kind=i8)/1024_i8) !kB
       write(6,*) 'ALLOC particles:',n,"kB",n/1024,"MB",n/1024**2,"GB"
     endif
 !

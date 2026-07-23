@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module bfxsmod
+      use kindmod
 c     --------------
       implicit none
 c
@@ -76,8 +77,8 @@ c
 c     ---------------------------
       implicit none
       integer,intent(in) :: nz,ne
-      real*8,intent(in) :: e
-      real*8 :: xs
+      real(dp),intent(in) :: e
+      real(dp) :: xs
 ****************************************************************************
 * Version 2. March 25, 1996.
 * Written by D. A. Verner, verner@pa.uky.edu
@@ -103,7 +104,7 @@ c     ---------------------------
 * the subroutine returns xs=0.
 ****************************************************************************
       integer :: nout,nint,is
-      real*8 :: p1,x,y,z,q,a,b,einn
+      real(dp) :: p1,x,y,z,q,a,b,einn
 c
       xs = 0d0
 c

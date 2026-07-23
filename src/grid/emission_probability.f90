@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine emission_probability
+  use kindmod
 
   use miscmod
   use inputparmod
@@ -14,9 +15,9 @@ subroutine emission_probability
 !-----------------------
 
   integer :: l,ig,igp1,iep,nepg
-  real*8 :: t0,t1
-  real*8 :: help
-  real*8 :: specarr(grp_ng)
+  real(dp) :: t0,t1
+  real(dp) :: help
+  real(dp) :: specarr(grp_ng)
 
   t0 = t_time()
 

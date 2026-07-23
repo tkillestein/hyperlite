@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 program superlite
+  use kindmod
 
   use randommod
   use sourcemod
@@ -31,7 +32,7 @@ program superlite
 !***********************************************************************
   integer :: ierr, it
   integer :: icell1, ncell !number of cells per rank (gas_ncell)
-  real*8 :: t0, t1 !timing
+  real(dp) :: t0=0d0, t1 !timing
   character(25) :: msg
 !
 !-- mpi initialization
@@ -238,7 +239,7 @@ program superlite
            if(it==in_niter.and.in_io_profdump) call output_profile
         endif
 !-- write hdf5 output (primary format)
-        call output_h5(it)
+        call output_h5
         if(it==in_niter.and.in_io_profdump) call output_h5_profile
         if(it>1.and.in_io_opacdump=='one') in_io_opacdump = 'off'
 

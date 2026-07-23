@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine eos_update(do_output)
+      use kindmod
 c     --------------------------------
       use gasmod
       use ionsmod
@@ -14,9 +15,9 @@ c     --------------------------------
 ************************************************************************
       integer :: i,ll,niter,iion,nion,istat
       integer :: iz,ii
-      real*8 :: t0,t1
-      real*8 :: ndens
-      real*8 :: pdens(ion_nion,gas_ncell)
+      real(dp) :: t0,t1
+      real(dp) :: ndens
+      real(dp) :: pdens(ion_nion,gas_ncell)
 c
 c-- loop over all gas_vals cells
       t0 = t_time()

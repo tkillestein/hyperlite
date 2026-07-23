@@ -20,12 +20,13 @@ endif()
 #-- all Fortran modules land in one directory
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 
-#-- compiler flags: the code base is legacy Fortran (real*8, argument
-#-- mismatches in MPI calls); tightened per-phase during modernization
+#-- compiler flags (Phase 4): the whole tree is held to -std=f2018 -Wall
+#-- on gfortran; the only exception is the MPI mpimod (nonstandard
+#-- argument mismatches inherent to the pre-mpi_f08 MPI interface)
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-std=legacy -fallow-argument-mismatch)
+  add_compile_options(-std=f2018 -Wall)
   set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -Wall -fcheck=all -fbacktrace")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -fcheck=all -fbacktrace")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -check all -traceback")
@@ -47,6 +48,10 @@ endif()
 if(HYPERLITE_MPI)
   find_package(MPI REQUIRED COMPONENTS Fortran)
   configure_file(src/core/mpimod_mpi.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set_source_files_properties(${PROJECT_BINARY_DIR}/mpimod.f PROPERTIES
+      COMPILE_OPTIONS "-std=legacy;-fallow-argument-mismatch")
+  endif()
 else()
   configure_file(src/core/mpimod_ser.f ${PROJECT_BINARY_DIR}/mpimod.f COPYONLY)
 endif()
@@ -68,6 +73,7 @@ endfunction()
 # module library (all .mod-producing sources; consumed by every component)
 ########################################################################
 add_library(hyperlite_modules OBJECT
+  src/core/kindmod.f90
   src/core/elemdatamod.f
   src/core/physconstmod.f
   src/core/randommod.f

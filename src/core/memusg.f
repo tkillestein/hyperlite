@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       function memusg() result(mbsize)
+      use kindmod
 c     -------------------------
       use miscmod, only:warn
       implicit none
@@ -17,22 +18,22 @@ c     -------------------------
        integer :: session    !%d !The session ID of the process.
        integer :: tty_nr     !%d !The tty the process uses.
        integer :: tpgid      !%d !The process group ID of the process which currently owns the tty that the process is connected to.
-       integer*8 :: flags      !%lu !The kernel flags word of the process. For bit meanings, see the PF_* defines in <linux/sched.h>. Details depend on the kernel version.
-       integer*8 :: minflt     !%lu !The number of minor faults the process has made which have not required loading a memory page from disk.
-       integer*8 :: cminflt    !%lu !The number of minor faults that the process's waited-for children have made.
-       integer*8 :: majflt     !%lu !The number of major faults the process has made which have required loading a memory page from disk.
-       integer*8 :: cmajflt    !%lu !The number of major faults that the process's waited-for children have made.
-       integer*8 :: utime      !%lu !The number of jiffies that this process has been scheduled in user mode.
-       integer*8 :: stime      !%lu !The number of jiffies that this process has been scheduled in kernel mode.
-       integer*8 :: cutime     !%ld !The number of jiffies that this process's waited-for children have been scheduled in user mode. (See also times(2).)
-       integer*8 :: cstime     !%ld !The number of jiffies that this process's waited-for children have been scheduled in kernel mode.
-       integer*8 :: priority   !%ld !The standard nice value, plus fifteen. The value is never negative in the kernel.
-       integer*8 :: nice       !%ld !The nice value ranges from 19 (nicest) to -19 (not nice to others).
-       integer*8 :: num_threads !%ld !This value is hard coded to 0 as a placeholder for a removed field.
-       integer*8 :: itrealvalue!%ld !The time in jiffies before the next SIGALRM is sent to the process due to an interval timer.
-       integer*8 :: starttime  !%lu !The time in jiffies the process started after system boot.
-       integer*8 :: vsize      !%lu !Virtual memory size in bytes.
-       integer*8 :: rss        !%ld !Resident Set Size: number of pages the process has in real memory, minus 3 for administrative purposes. This is just the pages which count towards text, data, or stack space. This does not include pages which have not been demand-loaded in, or which are swapped out.
+       integer(i8) :: flags      !%lu !The kernel flags word of the process. For bit meanings, see the PF_* defines in <linux/sched.h>. Details depend on the kernel version.
+       integer(i8) :: minflt     !%lu !The number of minor faults the process has made which have not required loading a memory page from disk.
+       integer(i8) :: cminflt    !%lu !The number of minor faults that the process's waited-for children have made.
+       integer(i8) :: majflt     !%lu !The number of major faults the process has made which have required loading a memory page from disk.
+       integer(i8) :: cmajflt    !%lu !The number of major faults that the process's waited-for children have made.
+       integer(i8) :: utime      !%lu !The number of jiffies that this process has been scheduled in user mode.
+       integer(i8) :: stime      !%lu !The number of jiffies that this process has been scheduled in kernel mode.
+       integer(i8) :: cutime     !%ld !The number of jiffies that this process's waited-for children have been scheduled in user mode. (See also times(2).)
+       integer(i8) :: cstime     !%ld !The number of jiffies that this process's waited-for children have been scheduled in kernel mode.
+       integer(i8) :: priority   !%ld !The standard nice value, plus fifteen. The value is never negative in the kernel.
+       integer(i8) :: nice       !%ld !The nice value ranges from 19 (nicest) to -19 (not nice to others).
+       integer(i8) :: num_threads !%ld !This value is hard coded to 0 as a placeholder for a removed field.
+       integer(i8) :: itrealvalue!%ld !The time in jiffies before the next SIGALRM is sent to the process due to an interval timer.
+       integer(i8) :: starttime  !%lu !The time in jiffies the process started after system boot.
+       integer(i8) :: vsize      !%lu !Virtual memory size in bytes.
+       integer(i8) :: rss        !%ld !Resident Set Size: number of pages the process has in real memory, minus 3 for administrative purposes. This is just the pages which count towards text, data, or stack space. This does not include pages which have not been demand-loaded in, or which are swapped out.
       end type statdata
       type(statdata) :: stat
 c

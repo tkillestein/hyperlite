@@ -2,6 +2,7 @@
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 !See LANL_COPYING and LANL_README for details of LANL copyright assertion.
 subroutine particle_advance
+  use kindmod
 
 !$ use omp_lib
   use randommod
@@ -28,35 +29,30 @@ subroutine particle_advance
   integer :: i
   integer :: npckt, nflux
   integer :: nstepddmc, nstepimc, nmethodswap
-  real*8 :: help, tau
+  real(dp) :: help, tau
   integer :: ipart
   integer, pointer :: ig, ic
   integer, pointer :: ix, iy, iz
-  real*8, pointer :: x,y,z, mu, e, e0, wl, om
-  real*8 :: vx,vy,vz,help1,help2,vhelp1,vhelp2
-  real*8 :: t0,t1
-  real*8 :: labfact
+  real(dp), pointer :: x,y,z, mu, e, e0, wl, om
+  real(dp) :: vx,vy,vz,help1,help2,vhelp1,vhelp2
+  real(dp) :: t0,t1
+  real(dp) :: labfact
 !
   integer :: icold, igold, ierr
-  real*8 :: eraddens, eamp
-  real*8 :: jrad
+  real(dp) :: eraddens, eamp
+  real(dp) :: jrad
 !-- specint cache
   integer :: nstepmax, ndist(-3:7)
 !
   type(packet),target :: ptcl
   type(packet2),target :: ptcl2
   type(grp_t_cache),target :: cache
-  real*8,target :: specarr(grp_ng)
-  integer*2,target :: glumps(grp_ng)
-  logical*2,target :: llumps(grp_ng)
+  real(dp),target :: specarr(grp_ng)
+  integer(i2),target :: glumps(grp_ng)
+  logical(lk2),target :: llumps(grp_ng)
 !
   type(rnd_t) :: rndstate
   integer,save :: iomp=0
-!
-!-- statement function
-  integer :: l
-  real*8 :: dx
-  dx(l) = grd_xarr(l+1) - grd_xarr(l)
 !
 !-- init timers
   t_pckt_stat = (/1d30, 0d0, 0d0/) !min,mean,max
@@ -323,6 +319,15 @@ subroutine particle_advance
   call counterreg(ct_npmethswap, nmethodswap)
   call counterreg(ct_npflux, nflux)
 
+
+
+contains
+
+  pure real(dp) function dx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx = grd_xarr(l+1) - grd_xarr(l)
+  end function dx
 
 end subroutine particle_advance
 ! vim: fdm=marker

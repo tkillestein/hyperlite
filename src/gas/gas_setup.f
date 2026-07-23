@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine gas_setup
+      use kindmod
 c     --------------------
       use inputstrmod
       use physconstmod
@@ -15,9 +16,9 @@ c     --------------------
 ************************************************************************
       integer :: l,i
       integer :: ig
-      ! real*8 :: W !dilution factor
-      real*8 :: massfr(0:gas_nelem,gas_ncell) !0:container for unused elements
-      real*8 :: wlm
+      ! real(dp) :: W !dilution factor
+      real(dp) :: massfr(0:gas_nelem,gas_ncell) !0:container for unused elements
+      real(dp) :: wlm
 c
 c-- agnostic mass setup
       gas_mass = str_massdd
@@ -99,17 +100,18 @@ c
 c
 c
       subroutine massfr2natomfr(massfr)
+      use kindmod
 c     ----------------------------------
       use physconstmod
       use elemdatamod, only:elem_data
       use gasmod
       implicit none
-      real*8,intent(inout) :: massfr(0:gas_nelem,gas_ncell)
+      real(dp),intent(inout) :: massfr(0:gas_nelem,gas_ncell)
 ************************************************************************
 * convert mass fractions to natom fractions, and mass to natom.
 ************************************************************************
       integer :: i,l
-      real*8 :: help
+      real(dp) :: help
       logical :: lwarn
 c
       lwarn = .true.

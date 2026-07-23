@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine source_transformdirection
+  use kindmod
 
   use particlemod
   use sourcemod
@@ -14,10 +15,10 @@ subroutine source_transformdirection
 
   integer :: ipart,ivac
   integer :: ix,iy,iz
-  real*8 :: vx,vy,vz,help1,help2,vhelp1,vhelp2
+  real(dp) :: vx,vy,vz,help1,help2,vhelp1,vhelp2
 
   type(packet),pointer :: p
-  real*8,pointer :: x,y,z
+  real(dp),pointer :: x,y,z
 
 !-- transform particle direction into lab frame
   do ipart=1,src_nnew

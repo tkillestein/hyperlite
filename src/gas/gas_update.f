@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine gas_update(it)
+      use kindmod
 c     -------------------------
       use gridmod
       use physconstmod
@@ -24,7 +25,7 @@ c     -------------------------
       logical :: do_output
       integer :: i,l
 c-- timing
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
 c
 c-- begin
       t0 = t_time()

@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine interior_source!(it)
+  use kindmod
 
   use randommod
   use sourcemod
@@ -19,27 +20,22 @@ subroutine interior_source!(it)
 !This subroutine instantiates new volume (cell) particle properties.
 !Composed of thermal source particle loop.
 !##################################################
-  integer :: i,j,k,ipart,ivac,ig,ii,iig
+  integer :: i,j,k,l,ipart,ivac,ig,ii,iig
   integer :: nhere,iimpi,nemit
-  integer*8,allocatable :: nvacantall(:)
-  real*8 :: pwr
-  real*8 :: r1, r2, r3, uul, uur, uumax
-  real*8 :: om0, mu0, x0, ep0, wl0
-  real*8 :: denom2,x1,x2
+  integer(i8),allocatable :: nvacantall(:)
+  real(dp) :: pwr
+  real(dp) :: r1, r2, r3, uul, uur, uumax
+  real(dp) :: om0, mu0, x0, ep0, wl0
+  real(dp) :: denom2,x1,x2
 !-- neighbor emit values (for source tilting)
   integer :: icnb(6)
 !-- jrad for sampling !experimental iterative approach
-  ! real*8,dimension(grd_ncell) :: jradsum
-  ! real*8,dimension(grp_ng) :: wlm,dwl
+  ! real(dp),dimension(grd_ncell) :: jradsum
+  ! real(dp),dimension(grp_ng) :: wlm,dwl
 !
-  real*8 :: emitprob(grp_ng)
-  real*8 :: tradinv
+  real(dp) :: emitprob(grp_ng)
+  real(dp) :: tradinv
   type(packet),pointer :: ptcl
-!-- statement functions
-  integer :: l
-  real*8 :: dx
-  dx(l) = grd_xarr(l+1) - grd_xarr(l)
-
 !-- shortcut
   pwr = in_srcepwr
 
@@ -94,6 +90,7 @@ subroutine interior_source!(it)
 
 !-- calculating wavelength
      denom2 = 0d0
+     iig = grp_ng !deterministic fall-through (always reassigned in loop)
      call rnd_r(r1,rnd_state)
      ! if(it>1) r1 = r1*jradsum(l) !experimental iterative approach
      do ig = 1, grp_ng
@@ -168,6 +165,15 @@ subroutine interior_source!(it)
   if(ipart/=src_nnew) stop 'interior_source: n/=nnew'
 
   call counterreg(ct_npcreate, src_nnew)
+
+
+contains
+
+  pure real(dp) function dx(l)
+    use kindmod
+    integer, intent(in) :: l
+    dx = grd_xarr(l+1) - grd_xarr(l)
+  end function dx
 
 end subroutine interior_source
 ! vim: fdm=marker

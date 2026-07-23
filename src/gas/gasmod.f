@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module gasmod
+      use kindmod
 c
       implicit none
 c***********************************************************************
@@ -9,7 +10,7 @@ c***********************************************************************
       integer,parameter :: gas_nelem=30
 c
 c-- input parameter (NLTE)
-       real*8 :: R_phot !radius where Rossland mean optical depth = 1
+       real(dp) :: R_phot !radius where Rossland mean optical depth = 1
 c
 c-- wavelength grid (gridmod has a copy as well)
       integer,private :: ng=0
@@ -17,41 +18,41 @@ c
 c-- domain decomposed grid variables used to calculate the state of the material (gas)
       integer :: gas_ncell=0
       integer :: gas_icell1=0
-      real*8,allocatable :: gas_temp(:)       !(ncell) !average temperature
-      real*8,allocatable :: gas_radtemp(:)    !(ncell) !radiation temperature
-      real*8,allocatable :: gas_lum(:)        !(ncell) !experimental cell luminosity as source
-      real*8,allocatable :: gas_eraddens(:)   !radiation energy density [erg/cm^3]
-      real*8,allocatable :: gas_ur(:)         !radiation energy [erg]
-      real*8,allocatable :: gas_rho(:)        !density [g/cm^3]
-      real*8,allocatable :: gas_vol(:)        !cell volume [cm^3]
-      real*8,allocatable :: gas_rcell(:)      !cell center radius [cm]
-      real*8,allocatable :: gas_divv(:)       !divergence of velocity
-      real*8,allocatable :: gas_mass(:)       !cell mass [g]
-      real*8,allocatable :: gas_massfr(:,:)   !(gas_nelem,gas_ncell) ! mass fractions for output
-      real*8,allocatable :: gas_ye(:)         !electron fraction
-      real*8,allocatable :: gas_natom(:)      !cell number of atoms
-      real*8,allocatable :: gas_nelec(:)      !cell number of electrons per atom
-      real*8,allocatable :: gas_natomfr(:,:)  !(0:gas_nelem,ncell)  !natom fractions (>0:stable, 0:container for unused elements)
+      real(dp),allocatable :: gas_temp(:)       !(ncell) !average temperature
+      real(dp),allocatable :: gas_radtemp(:)    !(ncell) !radiation temperature
+      real(dp),allocatable :: gas_lum(:)        !(ncell) !experimental cell luminosity as source
+      real(dp),allocatable :: gas_eraddens(:)   !radiation energy density [erg/cm^3]
+      real(dp),allocatable :: gas_ur(:)         !radiation energy [erg]
+      real(dp),allocatable :: gas_rho(:)        !density [g/cm^3]
+      real(dp),allocatable :: gas_vol(:)        !cell volume [cm^3]
+      real(dp),allocatable :: gas_rcell(:)      !cell center radius [cm]
+      real(dp),allocatable :: gas_divv(:)       !divergence of velocity
+      real(dp),allocatable :: gas_mass(:)       !cell mass [g]
+      real(dp),allocatable :: gas_massfr(:,:)   !(gas_nelem,gas_ncell) ! mass fractions for output
+      real(dp),allocatable :: gas_ye(:)         !electron fraction
+      real(dp),allocatable :: gas_natom(:)      !cell number of atoms
+      real(dp),allocatable :: gas_nelec(:)      !cell number of electrons per atom
+      real(dp),allocatable :: gas_natomfr(:,:)  !(0:gas_nelem,ncell)  !natom fractions (>0:stable, 0:container for unused elements)
 
 c== DD copies
 c-- Line+Cont. extinction coeff
-      real*4,allocatable :: gas_cap(:,:) !(ng,ncell)
+      real(sp),allocatable :: gas_cap(:,:) !(ng,ncell)
 c-- Line+Cont. "emission opacity !NLTE
-      real*4,allocatable :: gas_capemit(:,:) !(ng,ncell)
+      real(sp),allocatable :: gas_capemit(:,:) !(ng,ncell)
 c-- Line+Cont. emissivity !OUTPUT
-      real*4,allocatable :: gas_emiss(:,:) !(ng,ncell)
+      real(sp),allocatable :: gas_emiss(:,:) !(ng,ncell)
 c-- scattering coefficient
-      real*8,allocatable :: gas_sig(:) !(ncell)
+      real(dp),allocatable :: gas_sig(:) !(ncell)
 c-- Planck opacity (gray)
-      real*8,allocatable :: gas_capgrey(:) !(ncell)
+      real(dp),allocatable :: gas_capgrey(:) !(ncell)
 c-- "Emission" opacity (gray)
-      real*8,allocatable :: gas_capemitgrey(:) !(ncell)
+      real(dp),allocatable :: gas_capemitgrey(:) !(ncell)
 c-- Rosseland mean opacity
-      real*8,allocatable :: gas_capross(:) !(ncell)
+      real(dp),allocatable :: gas_capross(:) !(ncell)
 c
-      real*8,allocatable :: gas_emit(:) !(ncell) amount of fictitious thermal energy emitted per cell in a time step
+      real(dp),allocatable :: gas_emit(:) !(ncell) amount of fictitious thermal energy emitted per cell in a time step
 c-- radiation intensity !NLTE
-      real*8,allocatable :: gas_jrad(:,:) !(ng,ncell) radiation intensity per cell per group
+      real(dp),allocatable :: gas_jrad(:,:) !(ng,ncell) radiation intensity per cell per group
 c
       save
 c

@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 subroutine analytic_opacity
+  use kindmod
 
   use inputparmod
   use groupmod
@@ -21,8 +22,8 @@ subroutine analytic_opacity
 !#####################################
 
   integer :: i, ig
-  real*8 :: x1(grp_ng),x2(grp_ng)  !unitless energy group bounds
-  real*8 :: capcoef(gas_ncell)
+  real(dp) :: x1(grp_ng),x2(grp_ng)  !unitless energy group bounds
+  real(dp) :: capcoef(gas_ncell)
 
   capcoef =0d0
   gas_cap = 0.

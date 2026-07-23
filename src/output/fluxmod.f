@@ -1,26 +1,27 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module fluxmod
+      use kindmod
 c     ------------------
       implicit none
 
       integer :: flx_ndim(3)=0  !number of flux groups (1D,2D,3D)
-      real*8 :: flx_wlmin,flx_wlmax
+      real(dp) :: flx_wlmin,flx_wlmax
       integer :: flx_ng=0  !number of flux groups (1D,2D,3D)
       integer :: flx_nmu=0 !number of polar bins (2D,3D)
       integer :: flx_nom=0 !number of azimuthal bins (3D)
 c
 c-- wavelength (wl), polar (mu), and azimuthal (om) bins
-      real*8,allocatable :: flx_wl(:) !(flx_ng)
-      real*8,allocatable :: flx_mu(:) !(flx_nmu)
-      real*8,allocatable :: flx_om(:) !(flx_nom)
+      real(dp),allocatable :: flx_wl(:) !(flx_ng)
+      real(dp),allocatable :: flx_mu(:) !(flx_nmu)
+      real(dp),allocatable :: flx_om(:) !(flx_nom)
 !
 !-- radiative flux
 !=================
 !-- outbound grouped luminosity
-      real*8,allocatable :: flx_luminos(:,:,:) !(flx_ng,flx_nmu,flx_nom)
+      real(dp),allocatable :: flx_luminos(:,:,:) !(flx_ng,flx_nmu,flx_nom)
 !-- sampled devation of group luminosity
-      real*8,allocatable :: flx_lumdev(:,:,:) !(flx_ng,flx_nmu,flx_nom)
+      real(dp),allocatable :: flx_lumdev(:,:,:) !(flx_ng,flx_nmu,flx_nom)
 !-- number of escaped particles per group
       integer,allocatable :: flx_lumnum(:,:,:) !(flx_ng,flx_nmu,flx_nom)
 c
@@ -76,7 +77,7 @@ c     ------------------------------
 *************************************************************
       logical :: lexists
       integer :: l,n
-      real*8 :: help
+      real(dp) :: help
 c
 c-- sanity check
       if(iflx>3.or.iflx<1) stop 'read_fluxgrid: invalid 1st arg'
@@ -120,12 +121,12 @@ c     ---------------------------------------
       use groupmod
       implicit none
       integer,intent(in) :: idex,iflx
-      real*8,intent(in) :: wlmin,wlmax
+      real(dp),intent(in) :: wlmin,wlmax
 *************************************************************
 * generate lab wavelength grid for flux
 *************************************************************
       integer :: i
-      real*8 :: help
+      real(dp) :: help
 c
 c-- wavelength
       if(iflx==1) then
@@ -140,8 +141,9 @@ c-- logarithmic wavelength
             flx_ng = idex
             allocate(flx_wl(flx_ng+1))
             help = wlmax/dble(wlmin)
-            forall(i=1:flx_ng+1) flx_wl(i) =
-     &        wlmin*help**((i-1d0)/flx_ng)
+            do i=1,flx_ng+1
+               flx_wl(i) = wlmin*help**((i-1d0)/flx_ng)
+            enddo
          else
             stop 'generate_fluxgrid: invalid nflx(1)'
          endif
@@ -153,7 +155,9 @@ c-- uniform polar array
             flx_nmu = idex
             allocate(flx_mu(flx_nmu+1))
             help = 2d0/flx_nmu
-            forall(i=1:flx_nmu+1) flx_mu(i) = -1d0+(i-1)*help
+            do i=1,flx_nmu+1
+               flx_mu(i) = -1d0+(i-1)*help
+            enddo
          else
             stop 'generate_fluxgrid: invalid nflx(2)'
          endif
@@ -165,7 +169,9 @@ c-- uniform azimuthal array
             flx_nom = idex
             allocate(flx_om(flx_nom+1))
             help = pc_pi2/flx_nom
-            forall(i=1:flx_nom+1) flx_om(i) = (i-1)*help
+            do i=1,flx_nom+1
+               flx_om(i) = (i-1)*help
+            enddo
          else
             stop 'generate_fluxgrid: invalid nflx(3)'
          endif

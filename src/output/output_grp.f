@@ -1,5 +1,6 @@
 *This file is part of SuperLite.
       subroutine output_grp
+      use kindmod
 c     --------------------------
       use inputparmod
       use groupmod
@@ -12,7 +13,7 @@ c     --------------------------
       integer :: i
       character(16),save :: fstat='replace'
       integer :: reclen
-      real*8 :: t0,t1
+      real(dp) :: t0,t1
 c
       t0 = t_time()
 c--

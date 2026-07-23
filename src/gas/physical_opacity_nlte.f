@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       subroutine physical_opacity_nlte!(it)
+      use kindmod
 c     ---------------------------
 c$    use omp_lib
       use physconstmod
@@ -22,61 +23,61 @@ c$    use omp_lib
 * bound-free, free-free opacities for all.
 ************************************************************************
       integer :: i,j
-      real*8 :: wlinv
+      real(dp) :: wlinv
 c-- timing
-      real*8 :: t0,t1,t2,t3,t4
+      real(dp) :: t0,t1,t2,t3,t4
 c-- subgridded wavelength
       integer :: ngsub
-      real*8 :: wlsub(grp_ng*grp_ngs+1)
+      real(dp) :: wlsub(grp_ng*grp_ngs+1)
 c-- helper arrays
-      real*8 :: grndlev(gas_ncell,ion_iionmax-1,gas_nelem)
-      real*8 :: hckt(gas_ncell),tempinv(gas_ncell)
-      real*8 :: hlparr(gas_ncell)
+      real(dp) :: grndlev(gas_ncell,ion_iionmax-1,gas_nelem)
+      real(dp) :: hckt(gas_ncell),tempinv(gas_ncell)
+      real(dp) :: hlparr(gas_ncell)
 c-- nlte
       integer :: llw,lup,nlte_nlev,nlte_nlin,coll_nlin ! levels and lines
-      real*8 :: g_llw,g_lup ! statistical weights
-      real*8 :: Aul,Bul,Blu,Cul,Clu ! Einstein coefficients
-      real*8 :: npop_llw,npop_lup
-      real*8 :: x_coll,f_coll,gamma,gamma_d ! Electron-Impact Excitation (EIE)
-      real*8 :: x_PI,f_PI,x_RR,f_RR ! Photo-ionization and radiative recombination
-      real*8,allocatable :: gamma_PI(:),gamma_RR(:)
-      real*8,allocatable :: rcoeff(:,:),rmatrix(:,:),rinv(:,:) !(nlte_nlev,nlte_nlev) !rate matrices
-      real*8,allocatable :: npophelp(:),nrate(:) !nlte_nlev !excitation level population column matrices n, and dn/dt
-      real*8,parameter :: fconst = pc_pi*pc_e**2/(pc_me*pc_c)
-      real*8,parameter :: kb_ev = pc_kb / pc_ev
+      real(dp) :: g_llw,g_lup ! statistical weights
+      real(dp) :: Aul,Bul,Blu,Cul,Clu ! Einstein coefficients
+      real(dp) :: npop_llw,npop_lup
+      real(dp) :: x_coll,f_coll,gamma,gamma_d ! Electron-Impact Excitation (EIE)
+      real(dp) :: x_PI,f_PI,x_RR,f_RR ! Photo-ionization and radiative recombination
+      real(dp),allocatable :: gamma_PI(:),gamma_RR(:)
+      real(dp),allocatable :: rcoeff(:,:),rmatrix(:,:),rinv(:,:) !(nlte_nlev,nlte_nlev) !rate matrices
+      real(dp),allocatable :: npophelp(:),nrate(:) !nlte_nlev !excitation level population column matrices n, and dn/dt
+      real(dp),parameter :: fconst = pc_pi*pc_e**2/(pc_me*pc_c)
+      real(dp),parameter :: kb_ev = pc_kb / pc_ev
 c-- output for debugging
       ! logical :: do_output = .false.
 c-- ffxs
-      real*8,parameter :: c1 = 4d0*pc_e**6/(3d0*pc_h*pc_me*pc_c**4)*
+      real(dp),parameter :: c1 = 4d0*pc_e**6/(3d0*pc_h*pc_me*pc_c**4)*
      &  sqrt(pc_pi2/(3*pc_me*pc_h*pc_c))
-      real*8 :: gg,u,gff,help
-      real*8 :: rgg,ru,dgg,du
+      real(dp) :: gg,u,gff,help
+      real(dp) :: rgg,ru,dgg,du
       integer :: iu,igg
 c-- bfxs
       integer :: il,ig,igs,iigs,iz,ii,ie
       integer :: l,ll,iln
       logical :: dirty
-      real*8 :: en,xs,wl
+      real(dp) :: en,xs,wl
 c-- bbxs
-      real*8 :: phi,ocggrnd,wl0,dwl
-      real*8 :: expfac(gas_ncell)
-      real*8 :: caphelp,emithelp
-      real*8 :: wlm,B_nu,J_nu
-      real*8,parameter :: ftpi4 = 15d0/pc_pi**4
+      real(dp) :: phi,ocggrnd,wl0,dwl
+      real(dp) :: expfac(gas_ncell)
+      real(dp) :: caphelp,emithelp
+      real(dp) :: wlm,B_nu,J_nu
+      real(dp),parameter :: ftpi4 = 15d0/pc_pi**4
 c-- temporary cap array in the right order
-      real*8,allocatable :: cap(:,:) !(gas_ncell,grp_ng*grp_ngs)
-      real*8,allocatable :: capemit(:,:) !(gas_ncell,grp_ng*grp_ngs)
-      real*8,allocatable :: emiss(:,:) !(gas_ncell,grp_ng*grp_ngs)
-      real*8 :: capp(gas_ncell),capr(gas_ncell)
+      real(dp),allocatable :: cap(:,:) !(gas_ncell,grp_ng*grp_ngs)
+      real(dp),allocatable :: capemit(:,:) !(gas_ncell,grp_ng*grp_ngs)
+      real(dp),allocatable :: emiss(:,:) !(gas_ncell,grp_ng*grp_ngs)
+      real(dp) :: capp(gas_ncell),capr(gas_ncell)
 c-- thomson scattering
-      real*8,parameter :: cthomson = 8d0*pc_pi*pc_e**4/(3d0*pc_me**2
+      real(dp),parameter :: cthomson = 8d0*pc_pi*pc_e**4/(3d0*pc_me**2
      &  *pc_c**4)
 c-- warn once
       logical :: lwarn
       ! character(40) :: fname
 c-- temporary population arrays
       type level_populations
-        real*8,allocatable :: n(:) !nlev
+        real(dp),allocatable :: n(:) !nlev
       end type level_populations
       type(level_populations),allocatable :: npop(:,:,:)
 c
@@ -125,9 +126,10 @@ c-- bound-bound
        do iz=1,gas_nelem
         do i=1,gas_ncell
          if(gas_mass(i)<=0d0) cycle
-         forall(ii=1:min(iz,ion_el(iz)%ni - 1))
-     &     grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)*
-     &     ion_grndlev(iz,i)%ginv(ii)
+         do ii=1,min(iz,ion_el(iz)%ni - 1)
+          grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)*
+     &      ion_grndlev(iz,i)%ginv(ii)
+         enddo
         enddo !i
        enddo !iz
 c
@@ -419,8 +421,9 @@ c
        do iz=1,gas_nelem
         do i=1,gas_ncell
          if(gas_mass(i)<=0d0) cycle
-         forall(ii=1:min(iz,ion_el(iz)%ni - 1))
-     &    grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)
+         do ii=1,min(iz,ion_el(iz)%ni - 1)
+          grndlev(i,ii,iz) = ion_grndlev(iz,i)%oc(ii)
+         enddo
         enddo !i
        enddo !iz
 c
@@ -670,13 +673,14 @@ c
       ! Returns the inverse of a matrix calculated by finding the LU
       ! decomposition.  Depends on LAPACK.
       function inv(A,size1,size2) result(Ainv)
+      use kindmod
       !     --------------------------------------------------
       implicit none
       integer,intent(in) :: size1,size2
-      real*8,intent(in) :: A(size1,size2)
-      real*8,dimension(size1,size2) :: Ainv
+      real(dp),intent(in) :: A(size1,size2)
+      real(dp),dimension(size1,size2) :: Ainv
 
-      real*8,dimension(size1) :: work  ! work array for LAPACK
+      real(dp),dimension(size1) :: work  ! work array for LAPACK
       integer,dimension(size1) :: ipiv   ! pivot indices
       integer :: n, info
 

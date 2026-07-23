@@ -1,11 +1,12 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       elemental function specint(x1,x2,m,nn) result(ss)
+      use kindmod
 c     -------------------------------------------------
       implicit none
-      real*8 :: ss
+      real(dp) :: ss
       integer,intent(in) :: m
-      real*8,intent(in) :: x1,x2
+      real(dp),intent(in) :: x1,x2
       integer,intent(in),optional :: nn
 !#########################################
 ! For m=3, this function integrates normalized
@@ -13,7 +14,7 @@ c     -------------------------------------------------
 ! Generally, m>=2
 !#########################################
       integer :: n,i
-      real*8 :: h,x
+      real(dp) :: h,x
 c
       ss = 0d0
       if (x2 == 0.0) return

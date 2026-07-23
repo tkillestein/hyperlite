@@ -1,6 +1,7 @@
 !This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 !Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
-subroutine output_h5(it)
+subroutine output_h5
+  use kindmod
 !***********************************************************************
 ! Write the self-describing HDF5 output file (output.h5), one group per
 ! physical quantity (see OVERHAUL.md section 3).  Static geometry/axes
@@ -18,11 +19,10 @@ subroutine output_h5(it)
   use totalsmod
   use sourcemod
   implicit none
-  integer, intent(in) :: it
 !
   logical, save :: lfirst = .true.
-  real*8 :: t0, t1
-  real*8 :: arr(grd_ncell), tot(4)
+  real(dp) :: t0, t1
+  real(dp) :: arr(grd_ncell), tot(4)
 !
   t0 = t_time()
 !
@@ -117,6 +117,7 @@ end subroutine output_h5
 
 
 subroutine output_h5_profile
+  use kindmod
 !***********************************************************************
 ! Write the final ejecta-structure profile to /profile (legacy
 ! output.profile), one dataset per column plus the mass-fraction table.
@@ -130,7 +131,7 @@ subroutine output_h5_profile
   integer :: l
   character(4) :: el_name
   character(3*gas_nelem) :: el_list
-  real*8 :: arr(grd_ncell)
+  real(dp) :: arr(grd_ncell)
 !
   call h5io_mkgroup('/profile')
   call h5io_write_d1('/profile/x_left', grd_xarr(:grd_ncell))
@@ -162,6 +163,7 @@ end subroutine output_h5_profile
 
 
 subroutine output_h5_close
+  use kindmod
 !-- close output.h5 (call once after the iteration loop, master rank)
   use hdf5_io
   implicit none

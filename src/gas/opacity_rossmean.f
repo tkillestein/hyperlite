@@ -1,6 +1,7 @@
 *This file is part of SuperLite.  SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2020-2025 Gururaj A Wagle.  All rights reserved.
       subroutine opacity_rossmean
+      use kindmod
 c     -----------------------------
       use inputparmod
       use groupmod
@@ -12,7 +13,7 @@ c     -----------------------------
 * Convert opacity into Rosseland mean opacities
 ************************************************************************
       integer :: i
-      real*8 :: specarr(grp_ng)
+      real(dp) :: specarr(grp_ng)
 c
 c-- Rossland opacity
       do i=1,gas_ncell

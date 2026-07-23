@@ -2,6 +2,7 @@
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
 *See LANL_COPYING and LANL_README for details of LANL copyright assertion.
       module inputstrmod
+      use kindmod
 c     ------------------
       implicit none
 ************************************************************************
@@ -14,39 +15,39 @@ c     ------------------
       logical :: str_llum=.false.
       integer,allocatable :: str_iabund(:) !(nabund)
 c
-      real*8,allocatable :: str_xleft(:) !(nx+1)
-      real*8,allocatable :: str_yleft(:) !(ny+1)
-      real*8,allocatable :: str_zleft(:) !(nz+1)
-      real*8,allocatable :: str_vxleft(:) !(nx+1)
-      real*8,allocatable :: str_vyleft(:) !(ny+1)
-      real*8,allocatable :: str_vzleft(:) !(nz+1)
-      real*8,allocatable :: str_mass(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_vol(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_temp(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_radtemp(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_lum(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_ye(:,:,:) !(nx,ny,nz)
-      real*8,allocatable :: str_massfr(:,:,:,:) !(nabund,nx,ny,nz)
+      real(dp),allocatable :: str_xleft(:) !(nx+1)
+      real(dp),allocatable :: str_yleft(:) !(ny+1)
+      real(dp),allocatable :: str_zleft(:) !(nz+1)
+      real(dp),allocatable :: str_vxleft(:) !(nx+1)
+      real(dp),allocatable :: str_vyleft(:) !(ny+1)
+      real(dp),allocatable :: str_vzleft(:) !(nz+1)
+      real(dp),allocatable :: str_mass(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_vol(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_temp(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_radtemp(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_lum(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_ye(:,:,:) !(nx,ny,nz)
+      real(dp),allocatable :: str_massfr(:,:,:,:) !(nabund,nx,ny,nz)
 c
 c-- domain compression
       integer :: str_nc=0  !number of cells in compressed grid
       integer,allocatable :: str_idcell(:) !(nc)
-      real*8,allocatable :: str_massdc(:) !(nc)
-      real*8,allocatable :: str_voldc(:) !(nc)
-      real*8,allocatable :: str_massfrdc(:,:) !(nabund,nc)
-      real*8,allocatable :: str_tempdc(:) !(nc)
-      real*8,allocatable :: str_radtempdc(:) !(nc)
-      real*8,allocatable :: str_lumdc(:) !(nc)
-      real*8,allocatable :: str_yedc(:) !(nc)
+      real(dp),allocatable :: str_massdc(:) !(nc)
+      real(dp),allocatable :: str_voldc(:) !(nc)
+      real(dp),allocatable :: str_massfrdc(:,:) !(nabund,nc)
+      real(dp),allocatable :: str_tempdc(:) !(nc)
+      real(dp),allocatable :: str_radtempdc(:) !(nc)
+      real(dp),allocatable :: str_lumdc(:) !(nc)
+      real(dp),allocatable :: str_yedc(:) !(nc)
 c
 c-- domain decomposition
-      real*8,allocatable :: str_massdd(:) !(gas_ncell)
-      real*8,allocatable :: str_voldd(:) !(gas_ncell)
-      real*8,allocatable :: str_massfrdd(:,:) !(nabund,gas_ncell)
-      real*8,allocatable :: str_tempdd(:) !(gas_ncell)
-      real*8,allocatable :: str_radtempdd(:) !(gas_ncell)
-      real*8,allocatable :: str_lumdd(:) !(gas_ncell)
-      real*8,allocatable :: str_yedd(:) !(gas_ncell)
+      real(dp),allocatable :: str_massdd(:) !(gas_ncell)
+      real(dp),allocatable :: str_voldd(:) !(gas_ncell)
+      real(dp),allocatable :: str_massfrdd(:,:) !(nabund,gas_ncell)
+      real(dp),allocatable :: str_tempdd(:) !(gas_ncell)
+      real(dp),allocatable :: str_radtempdd(:) !(gas_ncell)
+      real(dp),allocatable :: str_lumdd(:) !(gas_ncell)
+      real(dp),allocatable :: str_yedd(:) !(gas_ncell)
 c
       character(8),allocatable,private :: str_abundlabl(:) !(nabund)
 c
@@ -98,8 +99,8 @@ c     --------------------------------------------------------
       integer :: ncell,ncpr
       character(2) :: dmy
       character(8),allocatable :: labl(:)
-      real*8,allocatable :: raw(:,:)
-      real*8 :: help
+      real(dp),allocatable :: raw(:,:)
+      real(dp) :: help
 c
 c-- copy
       igeom = igeomin

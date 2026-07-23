@@ -1,6 +1,7 @@
 *This file is part of SuperLite. SuperLite is released under the terms of the GNU GPLv3, see COPYING.
 *Copyright (c) 2023 Gururaj A. Wagle.  All rights reserved.
       module ffxsmod
+      use kindmod
 c     --------------
       implicit none
 ************************************************************************
@@ -17,7 +18,7 @@ c     --------------
 ************************************************************************
       integer,parameter :: ff_nu=81, ff_ngg=41
 c
-      real*8 :: ff_gff(ff_nu,ff_ngg)
+      real(dp) :: ff_gff(ff_nu,ff_ngg)
 c
       save
 c
@@ -36,7 +37,7 @@ c     -------------------------
       integer :: istat
       logical :: ok
 c
-      real*8 :: gff_raw(3,ff_nu,ff_ngg)
+      real(dp) :: gff_raw(3,ff_nu,ff_ngg)
 c
 c-- read
       if(h5io_atomdata_h5) then
