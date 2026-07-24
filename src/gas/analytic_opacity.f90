@@ -26,7 +26,7 @@ subroutine analytic_opacity
   real(dp) :: capcoef(gas_ncell)
 
   capcoef =0d0
-  gas_cap = 0.
+  gas_cap = 0d0
   gas_sig = 0d0
 
   !Calculating grey scattering opacity

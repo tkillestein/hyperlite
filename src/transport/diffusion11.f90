@@ -239,7 +239,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         mu = 1d0-2d0*r1
 !-- position sampled uniformly
         call rnd_r(r1,rndstate)
-        x = (r1*grd_xarr(ix+1)**3 + (1.0-r1)*grd_xarr(ix)**3)**(1.0/3.0)
+        x = (r1*grd_xarr(ix+1)**3 + (1d0-r1)*grd_xarr(ix)**3)**(1d0/3d0)
 !-- must be inside cell
         x = min(x,grd_xarr(ix+1))
         x = max(x,grd_xarr(ix))
@@ -248,9 +248,9 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
 !
 !-- velocity effects accounting
-        mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
-        wl = wl*(1.0-vx*mu*cinv)
-        help = 1d0/(1.0-vx*mu*cinv)
+        mu = (mu+vx*cinv)/(1d0+vx*mu*cinv)
+        wl = wl*(1d0-vx*mu*cinv)
+        help = 1d0/(1d0-vx*mu*cinv)
         totevelo = totevelo+e*(1d0 - help)
         e = e*help
         e0 = e0*help
@@ -293,14 +293,14 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
            call rnd_r(r2,rndstate)
            mu = -max(r1,r2)
 !-- doppler and aberration corrections
-           mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
+           mu = (mu+vx*cinv)/(1d0+vx*mu*cinv)
 !-- velocity effects accounting
-           help = 1d0/(1.0-vx*mu*cinv)
+           help = 1d0/(1d0-vx*mu*cinv)
            totevelo = totevelo+e*(1d0 - help)
 !
            e = e*help
            e0 = e0*help
-           wl = wl*(1.0-vx*mu*cinv)
+           wl = wl*(1d0-vx*mu*cinv)
         endif
 !
 !-- update particle
@@ -377,14 +377,14 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
            mu = max(r1,r2)
 !
 !-- doppler and aberration corrections
-           mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
+           mu = (mu+vx*cinv)/(1d0+vx*mu*cinv)
 !-- velocity effects accounting
-           help = 1d0/(1.0-vx*mu*cinv)
+           help = 1d0/(1d0-vx*mu*cinv)
            totevelo = totevelo+e*(1d0 - help)
 !
            e = e*help
            e0 = e0*help
-           wl = wl*(1.0-vx*mu*cinv)
+           wl = wl*(1d0-vx*mu*cinv)
         endif
 !
 !-- update particle
@@ -427,7 +427,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         mu = 1d0-2d0*r1
 !-- position sampled uniformly
         call rnd_r(r1,rndstate)
-        x = (r1*grd_xarr(ix+1)**3 + (1.0-r1)*grd_xarr(ix)**3)**(1.0/3.0)
+        x = (r1*grd_xarr(ix+1)**3 + (1d0-r1)*grd_xarr(ix)**3)**(1d0/3d0)
 !-- must be inside cell
         x = min(x,grd_xarr(ix+1))
         x = max(x,grd_xarr(ix))
@@ -436,14 +436,14 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
 !
 !-- doppler and aberration corrections
-        mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
+        mu = (mu+vx*cinv)/(1d0+vx*mu*cinv)
 !-- velocity effects accounting
         help = 1d0/(1d0-vx*mu*cinv)
         totevelo = totevelo+e*(1d0 - help)
 !
         e = e*help
         e0 = e0*help
-        wl = wl*(1.0-vx*mu*cinv)
+        wl = wl*(1d0-vx*mu*cinv)
      endif
 
   endif

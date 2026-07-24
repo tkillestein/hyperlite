@@ -119,7 +119,7 @@ c
 c-- ndim=2 alloc big
       allocate(gas_cap(ng,gas_ncell))
       allocate(gas_capemit(ng,gas_ncell))
-      gas_capemit = 0. !only computed in NLTE mode, but always dumped
+      gas_capemit = 0d0 !only computed in NLTE mode, but always dumped
       allocate(gas_emiss(ng,gas_ncell))
       allocate(gas_jrad(ng,gas_ncell))
 

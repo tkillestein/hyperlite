@@ -268,14 +268,15 @@ c
          bb_xs(ilinall)%wl0 = 1e8/(abs(bbxs_level(lhg)%chi) - !in ang
      &     abs(bbxs_level(llw)%chi))
          !-- flip low<->high levels
-         if(bb_xs(ilinall)%wl0 < 0.) then
+         if(bb_xs(ilinall)%wl0 < 0d0) then
           llw = lhg
           lhg = bbxs_line(l)%lev1
           bb_xs(ilinall)%wl0 = -bb_xs(ilinall)%wl0
          endif
          !-- g*xs
-         bb_xs(ilinall)%gxs = fconst*bbxs_level(llw)%g*
-     &     10.**bbxs_line(l)%f          !fconst = pi*e**2/(m_e*c)
+         bb_xs(ilinall)%gxs = real(fconst*bbxs_level(llw)%g*
+     &     10d0**bbxs_line(l)%f, sp)     !fconst = pi*e**2/(m_e*c)
+c-- gxs is stored single precision (line list); 10**f in dp then rounded
          !-- exp(chi)
          bb_xs(ilinall)%chilw = abs(bbxs_level(llw)%chi)
          !-- ion code

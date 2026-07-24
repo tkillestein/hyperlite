@@ -248,8 +248,8 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
      call rnd_r(r1,rndstate)
 !-- anisotropic scattering (experimental)
      if(d==dthm.and.trn_thm_aniso) then
-       mutemp = ((4d0*r1-2d0+SQRT(1d0+16d0*(r1-0.5)**2d0))**(1d0/3d0) - &
-             (SQRT(1d0+16d0*(r1-0.5)**2d0)-(4d0-2d0*r1))**(1d0/3d0))
+       mutemp = ((4d0*r1-2d0+SQRT(1d0+16d0*(r1-0.5d0)**2d0))**(1d0/3d0) - &
+             (SQRT(1d0+16d0*(r1-0.5d0)**2d0)-(4d0-2d0*r1))**(1d0/3d0))
        muhelp = mutemp ! need to verify
        B = 2*mutemp*muhelp
        C = mutemp**2 + muhelp**2 - 1
@@ -258,7 +258,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
        !-- randomizing the angle sampling
        if(munew1.le.1.and.munew1.ge.-1.and.&
          munew2.le.1.and.munew2.ge.-1) then
-         if(r1<0.5) then
+         if(r1<0.5d0) then
            mu = munew1
          else
            mu = munew2
@@ -360,7 +360,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         help = 4d0/(3d0*help+6d0*pc_dext)
 !-- sampling
         call rnd_r(r1,rndstate)
-        if (r1 < help*(1d0+1.5*abs(mu))) then
+        if (r1 < help*(1d0+1.5d0*abs(mu))) then
            ptcl2%itype = 2
 !-- velocity effects accounting
            totevelo=totevelo+e*(1d0-elabfact)

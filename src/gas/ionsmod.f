@@ -407,8 +407,8 @@ c-- constants
       ktri = 1d0/(pc_kb*radtemp)
       chi_0 = ion_el(1)%i(1)%e ! ionization edge for SNe II - 912 Angstrom
 c-- evaluate dilution factor
-      help = (1-(in_R_phot/rcell)**2)**0.5
-      W = 0.5*(1-help)
+      help = (1-(in_R_phot/rcell)**2)**0.5d0
+      W = 0.5d0*(1-help)
 c-- weighted mean departure coefficient
       b = 1d0/W
 c-- evaluate partition functions:
@@ -461,7 +461,7 @@ c-- determine zeta, delta, and then phi_nlte from phi_lte
               help = help - exp((ion_el(iz)%i(ii)%e - chi_0)*ktri)
               delta = 1 + help
            endif
-           help = W*(delta*zeta+W*(1-zeta))*((temp/radtemp)**0.5)
+           help = W*(delta*zeta+W*(1-zeta))*((temp/radtemp)**0.5d0)
            phi_nlte(iz)%phis(ii) = help * phi_lte(iz)%phis(ii)
          enddo !ii
         enddo !istart

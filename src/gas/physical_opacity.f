@@ -129,7 +129,7 @@ c
 c-- update
         if(dirty) then
          dirty = .false.
-         wl = .5*(wlsub(igs) + wlsub(igs+1))
+         wl = 0.5d0*(wlsub(igs) + wlsub(igs+1))
          wlinv = 1d0/wl
          dwl = wlsub(igs+1) - wlsub(igs)  !in cm
 c-- approximate expfac
@@ -149,7 +149,7 @@ c-- evaluate cap
 *        expfac = 1d0 - exp(-hckt(i)/wl0)  !exact expfac
          caphelp = phi*bb_xs(il)%gxs*ocggrnd*
      &     exp(-bb_xs(il)%chilw*hckt(i))*expfac(i)
-!        if(caphelp==0.) write(6,*) 'cap0',cap(i,igs),phi,
+!        if(caphelp==0d0) write(6,*) 'cap0',cap(i,igs),phi,
 !    &     bb_xs(il)%gxs,ocggrnd,exp(-bb_xs(il)%chilw*hckt(i)),expfac !DEBUG
          cap(i,igs) = cap(i,igs) + caphelp
         enddo !i
@@ -288,8 +288,8 @@ c-- sanity check
       do i=1,gas_ncell
        if(gas_mass(i)<=0d0) cycle
        do ig=1,grp_ng
-        if(gas_cap(ig,i)==0.) j = ior(j,1)
-        if(gas_cap(ig,i)<0.) j = ior(j,2)
+        if(gas_cap(ig,i)==0d0) j = ior(j,1)
+        if(gas_cap(ig,i)<0d0) j = ior(j,2)
         if(gas_cap(ig,i)/=gas_cap(ig,i)) j = ior(j,4)
         if(gas_cap(ig,i)>huge(gas_cap)) j = ior(j,8)
        enddo !ig
@@ -304,8 +304,8 @@ c-- refine sanity check
        do i=1,gas_ncell
         if(gas_mass(i)<=0d0) cycle
         do ig=1,grp_ng
-         if(gas_cap(ig,i)/=0.) j = ior(j,1)
-         if(gas_cap(ig,i)>=0.) j = ior(j,2)
+         if(gas_cap(ig,i)/=0d0) j = ior(j,1)
+         if(gas_cap(ig,i)>=0d0) j = ior(j,2)
          if(gas_cap(ig,i)==gas_cap(ig,i)) j = ior(j,4)
          if(gas_cap(ig,i)<=huge(gas_cap)) j = ior(j,8)
         enddo !ig
@@ -321,8 +321,8 @@ c-- sanity check ! emiss
       do i=1,gas_ncell
        if(gas_mass(i)<=0d0) cycle
        do ig=1,grp_ng
-        if(gas_emiss(ig,i)==0.) j = ior(j,1)
-        if(gas_emiss(ig,i)<0.) j = ior(j,2)
+        if(gas_emiss(ig,i)==0d0) j = ior(j,1)
+        if(gas_emiss(ig,i)<0d0) j = ior(j,2)
         if(gas_emiss(ig,i)/=gas_emiss(ig,i)) j = ior(j,4)
         if(gas_emiss(ig,i)>huge(gas_emiss)) j = ior(j,8)
        enddo !ig
@@ -337,8 +337,8 @@ c-- refine sanity check
        do i=1,gas_ncell
         if(gas_mass(i)<=0d0) cycle
         do ig=1,grp_ng
-         if(gas_emiss(ig,i)/=0.) j = ior(j,1)
-         if(gas_emiss(ig,i)>=0.) j = ior(j,2)
+         if(gas_emiss(ig,i)/=0d0) j = ior(j,1)
+         if(gas_emiss(ig,i)>=0d0) j = ior(j,2)
          if(gas_emiss(ig,i)==gas_emiss(ig,i)) j = ior(j,4)
          if(gas_emiss(ig,i)<=huge(gas_emiss)) j = ior(j,8)
         enddo !ig

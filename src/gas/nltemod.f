@@ -370,9 +370,9 @@ c
 c
       do i=1,grd_ncell
 c-- temperature estimator
-       Trad(i) = (grd_tally(i)/(pc_acoef*grd_vol(i)))**.25
+       Trad(i) = (grd_tally(i)/(pc_acoef*grd_vol(i)))**0.25d0
 c-- dampen the estimate for convergence
-       grd_radtemp(i) = grd_radtemp(i) + 0.5*(Trad(i)-grd_radtemp(i))
+       grd_radtemp(i) = grd_radtemp(i) + 0.5d0*(Trad(i)-grd_radtemp(i))
 c-- radiation energy density estimator
        do ig=1,grp_ng
          wlm = 0.5d0*(grp_wl(ig+1) + grp_wl(ig))

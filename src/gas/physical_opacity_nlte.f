@@ -207,7 +207,7 @@ c$omp& reduction(+:rcoeff)
      &        nlte_data(iz)%i(ii)%C3(il)*log(x_coll)**3
            f_coll = exp(f_coll)
            gamma = 1.58d-5*(f_coll/x_coll)*exp(-1d0*x_coll)*
-     &        (tempinv(i)**1.5)/(kb_ev**1.5)
+     &        (tempinv(i)**1.5d0)/(kb_ev**1.5d0)
 c-- de-excitation rates
            llw = nlte_data(iz)%i(ii)%llw_coll(il)
            lup = nlte_data(iz)%i(ii)%lup_coll(il)
@@ -241,7 +241,7 @@ c-- PI/RR rates
      &        nlte_data(iz)%i(ii)%C3_PI(ll)*log(x_PI)**3
             f_PI = exp(f_PI)
             gamma_PI(l) = (f_PI/x_PI)*exp(-1d0*x_PI)*
-     &        (tempinv(i)**1.5)/(kb_ev**1.5)
+     &        (tempinv(i)**1.5d0)/(kb_ev**1.5d0)
 c
             x_RR = kb_ev*gas_radtemp(i)
             f_RR = nlte_data(iz)%i(ii)%C0_RR(ll) +
@@ -315,7 +315,7 @@ c
 c-- update
           if(dirty) then
            dirty = .false.
-           wl = .5*(wlsub(igs) + wlsub(igs+1))
+           wl = 0.5d0*(wlsub(igs) + wlsub(igs+1))
            wlinv = 1d0/wl
            dwl = wlsub(igs+1) - wlsub(igs)  !in cm
 c-- approximate profile function
@@ -378,7 +378,7 @@ c
 c-- update
         if(dirty) then
          dirty = .false.
-         wl = .5*(wlsub(igs) + wlsub(igs+1))
+         wl = 0.5d0*(wlsub(igs) + wlsub(igs+1))
          wlinv = 1d0/wl
          dwl = wlsub(igs+1) - wlsub(igs)  !in cm
 c-- approximate expfac
@@ -563,8 +563,8 @@ c-- sanity check
       do i=1,gas_ncell
        if(gas_mass(i)<=0d0) cycle
        do ig=1,grp_ng
-        if(gas_cap(ig,i)==0.) j = ior(j,1)
-        if(gas_cap(ig,i)<0.) j = ior(j,2)
+        if(gas_cap(ig,i)==0d0) j = ior(j,1)
+        if(gas_cap(ig,i)<0d0) j = ior(j,2)
         if(gas_cap(ig,i)/=gas_cap(ig,i)) j = ior(j,4)
         if(gas_cap(ig,i)>huge(gas_cap)) j = ior(j,8)
        enddo !ig
@@ -579,8 +579,8 @@ c-- refine sanity check
        do i=1,gas_ncell
         if(gas_mass(i)<=0d0) cycle
         do ig=1,grp_ng
-         if(gas_cap(ig,i)/=0.) j = ior(j,1)
-         if(gas_cap(ig,i)>=0.) j = ior(j,2)
+         if(gas_cap(ig,i)/=0d0) j = ior(j,1)
+         if(gas_cap(ig,i)>=0d0) j = ior(j,2)
          if(gas_cap(ig,i)==gas_cap(ig,i)) j = ior(j,4)
          if(gas_cap(ig,i)<=huge(gas_cap)) j = ior(j,8)
         enddo !ig
@@ -596,8 +596,8 @@ c-- sanity check ! capemit
       do i=1,gas_ncell
        if(gas_mass(i)<=0d0) cycle
        do ig=1,grp_ng
-        if(gas_capemit(ig,i)==0.) j = ior(j,1)
-        if(gas_capemit(ig,i)<0.) j = ior(j,2)
+        if(gas_capemit(ig,i)==0d0) j = ior(j,1)
+        if(gas_capemit(ig,i)<0d0) j = ior(j,2)
         if(gas_capemit(ig,i)/=gas_capemit(ig,i)) j = ior(j,4)
         if(gas_capemit(ig,i)>huge(gas_capemit)) j = ior(j,8)
        enddo !ig
@@ -612,8 +612,8 @@ c-- refine sanity check
        do i=1,gas_ncell
         if(gas_mass(i)<=0d0) cycle
         do ig=1,grp_ng
-         if(gas_capemit(ig,i)/=0.) j = ior(j,1)
-         if(gas_capemit(ig,i)>=0.) j = ior(j,2)
+         if(gas_capemit(ig,i)/=0d0) j = ior(j,1)
+         if(gas_capemit(ig,i)>=0d0) j = ior(j,2)
          if(gas_capemit(ig,i)==gas_capemit(ig,i)) j = ior(j,4)
          if(gas_capemit(ig,i)<=huge(gas_capemit)) j = ior(j,8)
         enddo !ig
@@ -629,8 +629,8 @@ c-- sanity check ! emiss
       do i=1,gas_ncell
        if(gas_mass(i)<=0d0) cycle
        do ig=1,grp_ng
-        if(gas_emiss(ig,i)==0.) j = ior(j,1)
-        if(gas_emiss(ig,i)<0.) j = ior(j,2)
+        if(gas_emiss(ig,i)==0d0) j = ior(j,1)
+        if(gas_emiss(ig,i)<0d0) j = ior(j,2)
         if(gas_emiss(ig,i)/=gas_emiss(ig,i)) j = ior(j,4)
         if(gas_emiss(ig,i)>huge(gas_emiss)) j = ior(j,8)
        enddo !ig
@@ -645,8 +645,8 @@ c-- refine sanity check
        do i=1,gas_ncell
         if(gas_mass(i)<=0d0) cycle
         do ig=1,grp_ng
-         if(gas_emiss(ig,i)/=0.) j = ior(j,1)
-         if(gas_emiss(ig,i)>=0.) j = ior(j,2)
+         if(gas_emiss(ig,i)/=0d0) j = ior(j,1)
+         if(gas_emiss(ig,i)>=0d0) j = ior(j,2)
          if(gas_emiss(ig,i)==gas_emiss(ig,i)) j = ior(j,4)
          if(gas_emiss(ig,i)<=huge(gas_emiss)) j = ior(j,8)
         enddo !ig

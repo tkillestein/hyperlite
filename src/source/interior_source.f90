@@ -145,9 +145,9 @@ subroutine interior_source!(it)
         uur = uur/uumax
         do while (r2 > r3)
            call rnd_r(r1,rnd_state)
-           x0 = (r1*grd_xarr(i+1)**3+(1.0-r1)*grd_xarr(i)**3)**(1.0/3.0)
+           x0 = (r1*grd_xarr(i+1)**3+(1d0-r1)*grd_xarr(i)**3)**(1d0/3d0)
            r3 = (x0-grd_xarr(i))/dx(i)
-           r3 = r3*uur+(1.0-r3)*uul
+           r3 = r3*uur+(1d0-r3)*uul
            call rnd_r(r2,rnd_state)
         enddo
         ptcl%x = x0

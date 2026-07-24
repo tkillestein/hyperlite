@@ -17,7 +17,7 @@ c     -------------------------------------------------
       real(dp) :: h,x
 c
       ss = 0d0
-      if (x2 == 0.0) return
+      if (x2 == 0d0) return
 c
       if(present(nn)) then
         n = nn

@@ -128,7 +128,7 @@ c-- renormalize (the container fraction (unused elements) is taken out)
        help = sum(massfr(1:,i))
        massfr(:,i) = massfr(:,i)/help
 c-- warn if renormalization factor is abnormal
-       if(abs(help-1d0)>.01 .and. lwarn) then
+       if(abs(help-1d0)>.01d0 .and. lwarn) then
         write(0,*) 'WARNING: large abundance normalization factor!',help
         write(6,*) 'WARNING: large abundance normalization factor!',help
         lwarn = .false. !warn once

@@ -145,7 +145,7 @@ contains
   subroutine h5io_read_f1(path, arr)
     character(*), intent(in) :: path
     real(sp), intent(out) :: arr(:)
-    arr = 0.
+    arr = 0d0
     stop 'hdf5_io stub: h5io_read_f1 called in a no-HDF5 build'
     if(.false.) write(6,*) path
   end subroutine h5io_read_f1
@@ -161,7 +161,7 @@ contains
   subroutine h5io_read_f2(path, arr)
     character(*), intent(in) :: path
     real(sp), intent(out) :: arr(:,:)
-    arr = 0.
+    arr = 0d0
     stop 'hdf5_io stub: h5io_read_f2 called in a no-HDF5 build'
     if(.false.) write(6,*) path
   end subroutine h5io_read_f2

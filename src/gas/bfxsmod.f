@@ -54,14 +54,14 @@ c-- read
       close(4)
       endif !h5io_atomdata_h5
 c-- parse
-      bf_ph1 = 0.
+      bf_ph1 = 0d0
       do l=1,1699
        ns = nint(ph1d(1,l))
        ne = nint(ph1d(2,l))
        nz = nint(ph1d(3,l))
        bf_ph1(:,ns,nz,ne) = ph1d(4:,l)
       enddo
-      bf_ph2 = 0.
+      bf_ph2 = 0d0
       do l=1,465
        ne = nint(ph2d(1,l))
        nz = nint(ph2d(2,l))
@@ -129,10 +129,10 @@ c
 c-- core state
       nint = ninn(ne)
       if(nz==15 .or. nz==17 .or. nz==19 .or. (nz>20 .and. nz/=26)) then
-       einn = 0.0
+       einn = 0d0
       else
        if(ne<3) then
-        einn = 1.0e30
+        einn = 1d30
        else
         einn = bf_ph1(1,nint,nz,ne)
        endif
@@ -146,17 +146,17 @@ c--
        if(is<=nint .or. e>=einn) then
         p1 = -bf_ph1(5,is,nz,ne)
         y = e/bf_ph1(2,is,nz,ne)
-        q = -0.5*p1 - ll(is) - 5.5
-        a = bf_ph1(3,is,nz,ne)*((y - 1.0)**2 + bf_ph1(6,is,nz,ne)**2)
-        b = sqrt(y/bf_ph1(4,is,nz,ne)) + 1.0
+        q = -0.5d0*p1 - ll(is) - 5.5d0
+        a = bf_ph1(3,is,nz,ne)*((y - 1d0)**2 + bf_ph1(6,is,nz,ne)**2)
+        b = sqrt(y/bf_ph1(4,is,nz,ne)) + 1d0
         xs = xs + a*y**q*b**p1
        else
         p1 = -bf_ph2(4,nz,ne)
-        q = -0.5*p1 - 5.5
+        q = -0.5d0*p1 - 5.5d0
         x = e/bf_ph2(1,nz,ne) - bf_ph2(6,nz,ne)
         z = sqrt(x*x + bf_ph2(7,nz,ne)**2)
-        a = bf_ph2(2,nz,ne)*((x - 1.0)**2 + bf_ph2(5,nz,ne)**2)
-        b = 1.0 + sqrt(z/bf_ph2(3,nz,ne))
+        a = bf_ph2(2,nz,ne)*((x - 1d0)**2 + bf_ph2(5,nz,ne)**2)
+        b = 1d0 + sqrt(z/bf_ph2(3,nz,ne))
         xs = xs + a*z**q*b**p1
        endif
       enddo !is
