@@ -34,7 +34,7 @@ subroutine particle_advance
   integer, pointer :: ig, ic
   integer, pointer :: ix, iy, iz
   real(dp), pointer :: x,y,z, mu, e, e0, wl, om
-  real(dp) :: vx,vy,vz,help1,help2,vhelp1,vhelp2
+  real(dp) :: vx,vy,vz
   real(dp) :: t0,t1
   real(dp) :: labfact
 !
@@ -88,11 +88,12 @@ subroutine particle_advance
 !$omp    grd_nx,grd_xarr,grd_ny,grd_yarr,grd_nz,grd_zarr,grd_icell, &
 !$omp    grp_ng,grp_wl,grd_igeom,grd_sig,grd_cap,grd_eamp, &
 !$omp    trn_tauddmc,trn_noampfact,trn_errorfatal, &
-!$omp    grd_vxarr,grd_methodswap,t_pckt_stat,transport,diffusion, &
+!$omp    grd_vxarr,grd_dvdx,grd_methodswap,t_pckt_stat, &
+!$omp    transport,diffusion, &
 !$omp    in_puretran,in_io_dogrdtally,in_nomp) &
 !$omp private(ptcl,ptcl2, &
 !$omp    x,y,z,mu,om,wl,e,e0,ix,iy,iz,ic,ig,icold,igold, &
-!$omp    vx,vy,vz,help1,help2,vhelp1,vhelp2, &
+!$omp    vx,vy,vz, &
 !$omp    i,t0,t1,help,tau,labfact,jrad, &
 !$omp    rndstate,eraddens,eamp,ierr,iomp) &
 !$omp reduction(+:grd_tally,grd_jrad, &
@@ -164,13 +165,9 @@ subroutine particle_advance
      else
         ptcl2%itype = 2 !DDMC
      endif
-!-- interpolate velocity
+!-- interpolate velocity (precomputed per-cell slope; see grid_setup)
 !-- x
-     vhelp1 = grd_vxarr(ix)
-     vhelp2 = grd_vxarr(ix+1)
-     help1 = grd_xarr(ix)
-     help2 = grd_xarr(ix+1)
-     vx = (vhelp1*(help2-x)+vhelp2*(x-help1))/(help2-help1)
+     vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
 !-- y
      vy = 0 ! 1-d sph
 !-- z

@@ -86,6 +86,8 @@ c-- cell centered radii
       real(dp),allocatable :: grd_rcell(:) !(ncell)
 c-- divergence of velocity
       real(dp),allocatable :: grd_divv(:) !(ncell)
+c-- radial velocity gradient dvx/dx (permanent; = interp slope = dvdr)
+      real(dp),allocatable :: grd_dvdx(:) !(ncell)
 c-- radiation energy density for tally
       real(dp),allocatable :: grd_tally(:)   !(ncell) (eraddens)
 c-- amplification factor excess
@@ -184,6 +186,7 @@ c-- ndim=3 alloc
       allocate(grd_ye(grd_ncell))
       allocate(grd_rcell(grd_ncell))
       allocate(grd_divv(grd_ncell))
+      allocate(grd_dvdx(grd_ncell))
 c
       allocate(grd_emit(grd_ncell))
       grd_emit = 0d0
@@ -252,6 +255,7 @@ c-- gasmod
       deallocate(grd_ye)
       deallocate(grd_rcell)
       deallocate(grd_divv)
+      deallocate(grd_dvdx)
 c
       ! deallocate(grd_capgam)
       deallocate(grd_emit)

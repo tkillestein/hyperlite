@@ -45,10 +45,12 @@ c-- maximum grid radius and cell radii, velocity divergence
       case(1,11)
        grd_rcell = (grd_xarr(2:grd_nx+1)+grd_xarr(1:grd_nx))/2
        !-- \vec{\nabla} \cdot \vec{v} = 2*vx_center/x_center + dvx/dx
+       !-- radial velocity gradient dvx/dx (linear interp slope, permanent)
+       grd_dvdx = (grd_vxarr(2:grd_nx+1) - grd_vxarr(1:grd_nx))/
+     &            (grd_xarr(2:grd_nx+1) - grd_xarr(1:grd_nx))
        grd_divv = 2*(grd_vxarr(2:grd_nx+1) + grd_vxarr(1:grd_nx))/
      &            (grd_xarr(2:grd_nx+1) + grd_xarr(1:grd_nx)) +
-     &            (grd_vxarr(2:grd_nx+1) - grd_vxarr(1:grd_nx))/
-     &            (grd_xarr(2:grd_nx+1) - grd_xarr(1:grd_nx))
+     &            grd_dvdx
       endselect
 c
 c-- sanity check

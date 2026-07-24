@@ -43,7 +43,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   real(dp) :: far
   real(dp) :: emitlump
 !-- interpolate velocity
-  real(dp) :: vhelp,vhelp1,vhelp2,help1,help2
+  real(dp) :: vhelp
   real(dp) :: dummy
 
   integer,pointer :: ix,ic,ig
@@ -121,7 +121,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !
 !-- Doppler shift distance
 !-- \tilde{v} frame
-  vhelp = grd_vxarr(ix) - dvdr(ix)*grd_xarr(ix)
+  vhelp = grd_vxarr(ix) - grd_dvdx(ix)*grd_xarr(ix)
   muhelp = (mu - vx*cinv) / (1 - mu*vx*cinv)
   wlhelp = (wl/elabfact) / (1 + (muhelp*(vx-vhelp)*cinv))
   ! lsuplum = .false.
@@ -129,17 +129,17 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
      ! lsuplum = .true.
      ! ddop = far
      goto 67
-  ! elseif(dvdr(ix)>0.and.ig<grp_ng) then !redshift
-  !    ddop = pc_c*wlhelp/(wl*dvdr(ix))*(elabfact - wl*grp_wlinv(ig+1))
-  ! elseif(dvdr(ix)<0.and.ig>1) then ! blueshift
-  !    ddop = pc_c*wlhelp/(wl*dvdr(ix))*(elabfact - wl*grp_wlinv(ig))
+  ! elseif(grd_dvdx(ix)>0.and.ig<grp_ng) then !redshift
+  !    ddop = pc_c*wlhelp/(wl*grd_dvdx(ix))*(elabfact - wl*grp_wlinv(ig+1))
+  ! elseif(grd_dvdx(ix)<0.and.ig>1) then ! blueshift
+  !    ddop = pc_c*wlhelp/(wl*grd_dvdx(ix))*(elabfact - wl*grp_wlinv(ig))
   ! else
   !    ddop = far
   ! endif
 !-- SuperNu method modified for non-homologous outflows
-  elseif(dvdr(ix)>0.and.ig<grp_ng) then !redshift
+  elseif(grd_dvdx(ix)>0.and.ig<grp_ng) then !redshift
      ddop = 3d0*pc_c/grd_divv(ix)*(elabfact - wl*grp_wlinv(ig+1))
-  elseif(dvdr(ix)<0.and.ig>1) then ! blueshift
+  elseif(grd_dvdx(ix)<0.and.ig>1) then ! blueshift
      ddop = 3d0*pc_c/grd_divv(ix)*(elabfact - wl*grp_wlinv(ig))
   else
      ddop = far
@@ -159,10 +159,10 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   xhelp = sqrt(x**2 + shelp**2 + 2d0*shelp*x*mu)
   muhelp = (mu*x + shelp) / xhelp
   !-- phi
-  phi = dvdr(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig+1))+&
-        vhelp*muhelp + dvdr(ix)*shelp
+  phi = grd_dvdx(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig+1))+&
+        vhelp*muhelp + grd_dvdx(ix)*shelp
   !-- derivative of phi
-  dphi = dvdr(ix) + vhelp*(1 - muhelp**2)/xhelp
+  dphi = grd_dvdx(ix) + vhelp*(1 - muhelp**2)/xhelp
   !-- next value, s_k
   ddop = shelp - phi / dphi
   !-- iterate to find ddop
@@ -173,18 +173,18 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
     xhelp = sqrt(x**2 + shelp**2 + 2d0*shelp*x*mu)
     muhelp = (mu*x + shelp) / xhelp
     !-- phi
-    if(dvdr(ix)>0.and.ig<grp_ng) then
-      phi = dvdr(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig+1))+&
-            vhelp*muhelp + dvdr(ix)*shelp
-    elseif(dvdr(ix)<0.and.ig>1) then
-      phi = dvdr(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig))+&
-            vhelp*muhelp + dvdr(ix)*shelp
+    if(grd_dvdx(ix)>0.and.ig<grp_ng) then
+      phi = grd_dvdx(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig+1))+&
+            vhelp*muhelp + grd_dvdx(ix)*shelp
+    elseif(grd_dvdx(ix)<0.and.ig>1) then
+      phi = grd_dvdx(ix)*mu*x - pc_c*(1-wl*grp_wlinv(ig))+&
+            vhelp*muhelp + grd_dvdx(ix)*shelp
     else
       ddop = far
       exit
     endif
     !-- derivative of phi
-    dphi = dvdr(ix) + vhelp*(1 - muhelp**2)/xhelp
+    dphi = grd_dvdx(ix) + vhelp*(1 - muhelp**2)/xhelp
     !-- update ddop
     ddop = shelp - phi / dphi
   enddo
@@ -211,12 +211,8 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !-- updating position, angle
   xold = x
   x = sqrt(x**2 + d**2 + 2d0*d*x*mu)
-!-- interpolate velocity
-  vhelp1 = grd_vxarr(ix)
-  vhelp2 = grd_vxarr(ix+1)
-  help1 = grd_xarr(ix)
-  help2 = grd_xarr(ix+1)
-  vx = (vhelp1*(help2-x)+vhelp2*(x-help1))/dx(ix)
+!-- interpolate velocity (precomputed per-cell slope; see grid_setup)
+  vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
   muold = mu
   if(x==0d0) then
      mu = 1d0
@@ -443,7 +439,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
 !
 !-- Doppler shift
   elseif(d == ddop) then
-     if(dvdr(ix).gt.0) then ! redshit
+     if(grd_dvdx(ix).gt.0) then ! redshit
         if(ig<grp_ng) then
 !-- shifting group
           ig = ig+1
@@ -454,7 +450,7 @@ pure subroutine transport11(ptcl,ptcl2,vx,vy,vz,rndstate,&
           wl=1d0/(r1*grp_wlinv(grp_ng+1) + (1d0-r1)*grp_wlinv(grp_ng))
           wl = wl*elabfact
         endif
-     elseif(dvdr(ix)<0) then ! blueshift
+     elseif(grd_dvdx(ix)<0) then ! blueshift
        if(ig>1) then
 !-- shifting group
           wl = (grp_wl(ig)+1d-6*(grp_wl(ig-1)-grp_wl(ig)))*elabfactold
@@ -515,18 +511,6 @@ contains
     integer, intent(in) :: l
     dx = grd_xarr(l+1) - grd_xarr(l)
   end function dx
-
-  pure real(dp) function dvx(l)
-    use kindmod
-    integer, intent(in) :: l
-    dvx = grd_vxarr(l+1) - grd_vxarr(l)
-  end function dvx
-
-  pure real(dp) function dvdr(l)
-    use kindmod
-    integer, intent(in) :: l
-    dvdr = dvx(l) / dx(l)
-  end function dvdr
 
 end subroutine transport11
 ! vim: fdm=marker

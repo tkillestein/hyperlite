@@ -49,7 +49,6 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   real(dp) :: capemitgreyinv
   real(dp) :: speclump
   real(dp) :: dist, help
-  real(dp) :: vhelp1,vhelp2,help1,help2
   real(dp) :: dummy
 
   integer,pointer :: ix, ic, ig
@@ -246,11 +245,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         x = max(x,grd_xarr(ix))
 !-- determine velocity coordinates (currently uses linear interpolation)
 !-- x
-        vhelp1 = grd_vxarr(ix)
-        vhelp2 = grd_vxarr(ix+1)
-        help1 = grd_xarr(ix)
-        help2 = grd_xarr(ix+1)
-        vx = (vhelp1*(help2-x)+vhelp2*(x-help1))/dx(ix)
+        vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
 !
 !-- velocity effects accounting
         mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
@@ -438,11 +433,7 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         x = max(x,grd_xarr(ix))
 !-- determine velocity coordinates (currently uses linear interpolation)
 !-- x
-        vhelp1 = grd_vxarr(ix)
-        vhelp2 = grd_vxarr(ix+1)
-        help1 = grd_xarr(ix)
-        help2 = grd_xarr(ix+1)
-        vx = (vhelp1*(help2-x)+vhelp2*(x-help1))/dx(ix)
+        vx = grd_vxarr(ix) + grd_dvdx(ix)*(x - grd_xarr(ix))
 !
 !-- doppler and aberration corrections
         mu = (mu+vx*cinv)/(1.0+vx*mu*cinv)
