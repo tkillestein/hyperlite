@@ -16,8 +16,7 @@ c     --------------------------------------
 * Determine the group in which to emit a particle.
 ************************************************************************
       real(dp) :: r1
-      integer :: l,iep,nepg,igp1
-      real(dp) :: specval(grd_nepg)
+      integer :: iep,igp1
       real(dp) :: emitprob
 c
 c-- search unnormalized cumulative emission probability values
@@ -29,8 +28,6 @@ c-- search unnormalized cumulative emission probability values
       iep = binsrch(r1,grd_emitprob(:,ic),grd_nep,.true.)
       ig = iep*grd_nepg + 1
       igp1 = min(ig + grd_nepg - 1, grp_ng)
-      nepg = igp1 - ig + 1
-      call specintv(grd_tempinv(ic),nepg,specval,offset=ig)
 c
 c-- start value
       if(iep==0) then
@@ -40,13 +37,12 @@ c-- start value
       endif
 c
 c-- step up until target r1 is reached
-      l = 0
+c-- (grd_specarr holds the specintv values cached per sweep in ddmc_tables)
       do ig=ig,igp1-1
-       l = l + 1
        if(in_nlte) then !NLTE
-         emitprob = emitprob + specval(l)*grd_capemit(ig,ic)
+         emitprob = emitprob + grd_specarr(ig,ic)*grd_capemit(ig,ic)
        else !LTE
-         emitprob = emitprob + specval(l)*grd_cap(ig,ic)
+         emitprob = emitprob + grd_specarr(ig,ic)*grd_cap(ig,ic)
        endif
        if(emitprob>r1) exit
       enddo

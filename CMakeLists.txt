@@ -34,6 +34,17 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -check all -traceback")
 endif()
 
+#-- link-time optimization for Release builds: inlines the per-draw
+#-- rnd_r -> rnd_word -> philox4x32 chain and other cross-file hot calls
+#-- into the transport kernel (verified byte-identical; no fast-math)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT HYPERLITE_IPO LANGUAGES Fortran)
+  if(HYPERLITE_IPO)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+  endif()
+endif()
+
 #-- dependencies
 find_package(LAPACK REQUIRED)  # dgetrf/dgetri in src/gas/physical_opacity_nlte.f
 if(HYPERLITE_HDF5)

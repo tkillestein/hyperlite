@@ -56,6 +56,14 @@ c-- ddmc_tables (opacity/temperature are constant during the sweep)
       real(dp),allocatable :: grd_doplump(:) !(ncell)
       real(dp),allocatable :: grd_capgreyinv(:) !(ncell)
       real(dp),allocatable :: grd_capemitgreyinv(:) !(ncell)
+c-- cumulative group-sampling tables: the exact partial sums the
+c-- diffusion11 scans accumulate, in scan order (see ddmc_tables)
+      real(dp),allocatable :: grd_leaklcum(:,:) !(ng,ncell) left leakage
+      real(dp),allocatable :: grd_leakrcum(:,:) !(ng,ncell) right leakage
+      real(dp),allocatable :: grd_scatcum(:,:) !(ng,ncell) effective scattering
+      real(dp),allocatable :: grd_dopcum(:,:) !(ng,ncell) doppler shift
+      integer(i2),allocatable :: grd_dopidx(:,:) !(ng,ncell) group tested per doppler entry
+      integer,allocatable :: grd_ndop(:) !(ncell) number of doppler entries
       real(dp),allocatable :: grd_tempinv(:) !(ncell)
 c-- scattering coefficient
       real(dp),allocatable :: grd_sig(:) !(ncell) !grey scattering opacity
@@ -200,6 +208,12 @@ c-- DDMC per-cell tables
       allocate(grd_doplump(grd_ncell))
       allocate(grd_capgreyinv(grd_ncell))
       allocate(grd_capemitgreyinv(grd_ncell))
+      allocate(grd_leaklcum(ng,grd_ncell))
+      allocate(grd_leakrcum(ng,grd_ncell))
+      allocate(grd_scatcum(ng,grd_ncell))
+      allocate(grd_dopcum(ng,grd_ncell))
+      allocate(grd_dopidx(ng,grd_ncell))
+      allocate(grd_ndop(grd_ncell))
 c
 c-- ndim=4 alloc
       allocate(grd_opaclump(11,grd_ncell))
@@ -252,6 +266,8 @@ c-- ndim=4 alloc
       deallocate(grd_specarr,grd_nlump,grd_glumps,grd_llumps)
       deallocate(grd_emitlump,grd_caplump,grd_capemitlump,grd_doplump)
       deallocate(grd_capgreyinv,grd_capemitgreyinv)
+      deallocate(grd_leaklcum,grd_leakrcum,grd_scatcum)
+      deallocate(grd_dopcum,grd_dopidx,grd_ndop)
       deallocate(grd_emitprob)
 c-- ndim=4 alloc
       deallocate(grd_cap)

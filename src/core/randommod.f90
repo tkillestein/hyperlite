@@ -192,16 +192,15 @@ module randommod
     implicit none
     integer(i8),intent(in) :: a,b
     integer(i8),intent(out) :: hi,lo
-!-- 32x32 -> 64 bit product of 32-bit words held in i8, via 16-bit limbs
-    integer(i8) :: alo,ahi,blo,bhi,ll,mid
-    alo = iand(a,mask16)
-    ahi = ishft(a,-16)
-    blo = iand(b,mask16)
-    bhi = ishft(b,-16)
-    ll = alo*blo
-    mid = alo*bhi + ahi*blo + ishft(ll,-16)
-    lo = ior(ishft(iand(mid,mask16),16),iand(ll,mask16))
-    hi = iand(ahi*bhi + ishft(mid,-16),mask32)
+!-- 32x32 -> 64 bit product of 32-bit words held in i8.  Split one
+!-- operand into 16-bit halves: both partial products are < 2^48, so
+!-- no signed overflow (two multiplies instead of four)
+    integer(i8) :: thi,tlo,s
+    thi = a*ishft(b,-16)                  !a * b_hi16
+    tlo = a*iand(b,mask16)                !a * b_lo16
+    s = ishft(iand(thi,mask16),16) + tlo  !low 48 bits of the product
+    lo = iand(s,mask32)
+    hi = iand(ishft(thi,-16) + ishft(s,-32),mask32)
   end subroutine mul32
 !
 !

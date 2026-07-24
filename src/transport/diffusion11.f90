@@ -36,16 +36,14 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   integer :: iig, iiig
   logical :: lhelp
   real(dp) :: r1, r2
-  real(dp) :: denom, denom2, denom3
+  real(dp) :: denom
   real(dp) :: ddmct, tau, pa, pdop
 !-- lumped quantities -----------------------------------------
 
   real(dp) :: emitlump, caplump, capemitlump, doplump
-  real(dp) :: specig
   real(dp) :: mfphelp, ppl, ppr
   real(dp) :: opacleak(2)
   real(dp) :: probleak(2)
-  real(dp) :: resopacleak, resdopleak
   integer :: glump
   real(dp) :: capgreyinv
   real(dp) :: capemitgreyinv
@@ -211,31 +209,16 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
      if(glump==0) then
         iiig = ig
      else
-!-- sample group
+!-- sample group (precomputed cumulative table; see ddmc_tables)
         call rnd_r(r1,rndstate)
-        denom2 = 0d0
-        help = 1d0/doplump
-        if(grd_divv(ix).ge.0) then ! redshift
-          do iig=1,glump
-             iiig = grd_glumps(iig,ic)
-             if(iiig == grp_ng) cycle
-             if(grd_cap(iiig+1,ic)*dist >= trn_taulump) cycle
-             resdopleak = dopspeccalc(grd_tempinv(ic),iiig)&
-                          *grd_divv(ix)/(3*pc_c)
-             denom2 = denom2+resdopleak*speclump*help
-             if(denom2>r1) exit
-          enddo
-         else ! blueshift
-           do iig=glump,1,-1
-             iiig = grd_glumps(iig,ic)
-             if(iiig == 1) cycle
-             if(grd_cap(iiig-1,ic)*dist >= trn_taulump) cycle
-             resdopleak = dopspeccalc(grd_tempinv(ic),iiig-1)&
-                          *grd_divv(ix)/(3*pc_c)
-             denom2 = denom2-resdopleak*speclump*help
-             if(denom2>r1) exit
-           enddo
-         endif
+        iig = firstgt(r1,grd_ndop(ic),grd_dopcum(:,ic))
+        if(iig<=grd_ndop(ic)) then
+           iiig = grd_dopidx(iig,ic)
+        elseif(grd_divv(ix).ge.0) then ! scan fall-through: last iterated
+           iiig = grd_glumps(glump,ic)
+        else
+           iiig = grd_glumps(1,ic)
+        endif
      endif
 
 !-- reshift/blueshift particle in this group
@@ -295,31 +278,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         if(glump==0) then
            iiig = ig
         else
-!-- sample group
+!-- sample group (precomputed cumulative table; see ddmc_tables)
            call rnd_r(r1,rndstate)
-           denom2 = 0d0
-           help = 1d0/opacleak(1)
-           do iig=1,glump
-              iiig = grd_glumps(iig,ic)
-              specig = grd_specarr(iiig,ic)
-              !specig = specint0(grd_tempinv(ic),iiig)
-!-- calculating resolved leakage opacities
-              if((grd_cap(iiig,l)+ &
-                   grd_sig(l))*dx(ix-1)<trn_tauddmc) then
-!-- DDMC interface
-                 mfphelp = (grd_cap(iiig,ic)+grd_sig(ic))*dx(ix)
-                 ppl = 4d0/(3d0*mfphelp+6d0*pc_dext)
-                 resopacleak = 1.5d0*ppl*(grd_xarr(ix))**2/dx3(ix)
-              else
-!-- IMC interface
-                 mfphelp = ((grd_sig(ic)+grd_cap(iiig,ic))*dx(ix)+&
-                      (grd_sig(l)+grd_cap(iiig,l))*dx(ix-1))
-                 resopacleak = 2.0d0*(grd_xarr(ix))**2/ &
-                      (mfphelp*dx3(ix))
-              endif
-              denom2 = denom2+specig*resopacleak*speclump*help
-              if(denom2>r1) exit
-           enddo
+           iig = min(firstgt(r1,glump,grd_leaklcum(:,ic)),glump)
+           iiig = grd_glumps(iig,ic)
         endif
 !
 !-- method changes to IMC
@@ -367,21 +329,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         mu = max(r1,r2)
         if(glump==0) then
         else
-!-- sample group
+!-- sample group (precomputed cumulative table; see ddmc_tables)
            call rnd_r(r1,rndstate)
-           denom2 = 0d0
-           help = 1d0/opacleak(2)
-           do iig=1,glump
-              iiig = grd_glumps(iig,ic)
-              specig = grd_specarr(iiig,ic)
-              !specig = specint0(grd_tempinv(ic),iiig)
-!-- calculating resolved leakage opacities
-              mfphelp = (grd_cap(iiig,ic)+grd_sig(ic))*dx(ix)
-              ppr = 4d0/(3d0*mfphelp+6d0*pc_dext)
-              resopacleak = 1.5d0*ppr*(grd_xarr(ix+1))**2/dx3(ix)
-              denom2 = denom2+specig*resopacleak*speclump*help
-              if(denom2>r1) exit
-           enddo
+           iig = min(firstgt(r1,glump,grd_leakrcum(:,ic)),glump)
+           iiig = grd_glumps(iig,ic)
            ig = iiig
         endif
 !-- sample wavelength
@@ -409,30 +360,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         if(glump==0) then
            iiig = ig
         else
-!-- sample group
+!-- sample group (precomputed cumulative table; see ddmc_tables)
            call rnd_r(r1,rndstate)
-           denom2 = 0d0
-           help = 1d0/opacleak(2)
-           do iig=1,glump
-              iiig = grd_glumps(iig,ic)
-              specig = grd_specarr(iiig,ic)
-!-- calculating resolved leakage opacities
-              if((grd_cap(iiig,l)+ &
-                   grd_sig(l))*dx(ix+1)<trn_tauddmc) then
-!-- DDMC interface
-                 mfphelp = (grd_cap(iiig,ic)+grd_sig(ic))*dx(ix)
-                 ppr = 4d0/(3d0*mfphelp+6d0*pc_dext)
-                 resopacleak = 1.5d0*ppr*(grd_xarr(ix+1))**2/dx3(ix)
-              else
-!-- IMC interface
-                 mfphelp = ((grd_sig(ic)+grd_cap(iiig,ic))*dx(ix)+&
-                      (grd_sig(l)+grd_cap(iiig,l))*dx(ix+1))
-                 resopacleak = 2.0d0*(grd_xarr(ix+1))**2/ &
-                      (mfphelp*dx3(ix))
-              endif
-              denom2 = denom2+specig*resopacleak*speclump*help
-              if(denom2>r1) exit
-           enddo
+           iig = min(firstgt(r1,glump,grd_leakrcum(:,ic)),glump)
+           iiig = grd_glumps(iig,ic)
         endif
 
 !-- method changes to IMC
@@ -484,21 +415,11 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
         call rnd_r(r1,rndstate)
         iiig = emitgroup(r1,ic)
      else
-!
+!-- sample group (precomputed cumulative table; see ddmc_tables)
         call rnd_r(r1,rndstate)
-        denom2 = 1d0/(1d0-emitlump)
-        denom3 = 0d0
-        do iig=grp_ng,glump+1,-1
-           iiig = grd_glumps(iig,ic)
-           if(in_nlte) then !NLTE
-             help = grd_specarr(iiig,ic)*grd_capemit(iiig,ic)&
-                    *capemitgreyinv
-           else
-             help = grd_specarr(iiig,ic)*grd_cap(iiig,ic)*capgreyinv
-           endif
-           denom3 = denom3 + help*denom2
-           if(denom3>r1) exit
-        enddo
+        iig = grp_ng + 1 - &
+             min(firstgt(r1,grp_ng-glump,grd_scatcum(:,ic)),grp_ng-glump)
+        iiig = grd_glumps(iig,ic)
      endif
      ig = iiig
      if((grd_sig(ic)+grd_cap(ig,ic))*dist < trn_tauddmc) then
@@ -543,9 +464,10 @@ pure subroutine diffusion11(ptcl,ptcl2,vx,vy,vz,rndstate,&
   endif
 
 !-- Doppler shift energy weights and wavelengths ! added - gaw
-  totevelo = totevelo + e*(1d0-exp(-grd_divv(ix)*ddmct/3))
-  e = e*exp(-grd_divv(ix)*ddmct/3)
-  e0 = e0*exp(-grd_divv(ix)*ddmct/3)
+  help = exp(-grd_divv(ix)*ddmct/3)
+  totevelo = totevelo + e*(1d0-help)
+  e = e*help
+  e0 = e0*help
 
 
 contains
@@ -561,6 +483,41 @@ contains
     integer, intent(in) :: l
     dx3 = grd_xarr(l+1)**3 - grd_xarr(l)**3
   end function dx3
+
+  pure integer function firstgt(r,n,cum)
+!-- first k in [1,n] with cum(k)>r, or n+1 if none: the index the old
+!-- sequential scan exits at.  cum is nondecreasing except for a
+!-- possible NaN tail from degenerate (Inf) per-cell tables; a NaN last
+!-- entry falls back to the sequential scan, which reproduces the
+!-- pre-table comparisons exactly.
+    use kindmod
+    real(dp), intent(in) :: r
+    integer, intent(in) :: n
+    real(dp), intent(in) :: cum(:)
+    integer :: klo, khi, kmid
+    if(n<1) then
+       firstgt = n+1
+       return
+    endif
+    if(cum(n)/=cum(n)) then
+       do kmid=1,n
+          if(cum(kmid)>r) exit
+       enddo
+       firstgt = kmid
+       return
+    endif
+    klo = 1
+    khi = n+1
+    do while(klo<khi)
+       kmid = (klo+khi)/2
+       if(cum(kmid)>r) then
+          khi = kmid
+       else
+          klo = kmid+1
+       endif
+    enddo
+    firstgt = klo
+  end function firstgt
 
 end subroutine diffusion11
 ! vim: fdm=marker
